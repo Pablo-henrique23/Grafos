@@ -9,7 +9,7 @@ class Graph
 public:
     /*Assinatura dos métodos básicos para o funcionamento da classe*/
 
-    Graph(std::ifstream& instance);
+    Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes);
     Graph();
     ~Graph();
 
@@ -23,9 +23,9 @@ public:
     int conected(size_t node_id_1, size_t node_id_2);
 
 private:
-    size_t _number_of_nodes;
-    size_t _number_of_edges;
-    bool   _directed;
+    size_t _number_of_nodes; // OK
+    size_t _number_of_edges; 
+    bool   _directed; 
     bool   _weighted_edges;
     bool   _weighted_nodes;
     Node  *_first;
