@@ -25,8 +25,9 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
     string linha;
     Node no;
     Node proximoNo;
-    Node primeiroNo;
     Edge aresta;
+    this->_number_of_edges =0;
+    this->_number_of_nodes = 0;
     while (getline(instance, linha)){    
         // Deus nos ajude com stringstream
         stringstream ss(linha);
@@ -37,7 +38,7 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
         add_node(proximoNo._id);
         add_edge(no._id,proximoNo._id,aresta._weight);
         add_edge(proximoNo._id,no._id,aresta._weight);
-    }
+            }
     print_graph();
    
 
@@ -65,6 +66,7 @@ if(this->_first==nullptr){
     Node* firstNode = new Node();
     _first = firstNode;
     _first->_id = node_id;
+    this->_number_of_nodes++;
 }else{
     Node* aux=_first;
     bool jaExiste=false;
@@ -75,6 +77,7 @@ if(this->_first==nullptr){
         aux = aux->_next_node;   
           if(aux->_id==node_id){
             jaExiste=true;
+            break;
         }
     }
     if(jaExiste){
@@ -83,6 +86,7 @@ if(this->_first==nullptr){
     aux->_next_node = new Node();
     aux->_next_node->_id = node_id;
    this->_last = aux->_next_node;
+       this->_number_of_nodes++;
 }
 }
 
@@ -102,6 +106,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
     if(No1->_first_edge==NULL){
     No1->_first_edge = new Edge();
     No1->_first_edge->_target_id = node_id_2;
+    this->_number_of_edges++;
     //    cout<<"Criando primeira aresta do no"<<No1->_id<<endl;
     }else{
         Edge* edgeTraversal=traversal->_first_edge;
@@ -111,6 +116,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
     }
     edgeTraversal->_next_edge = new Edge();
     edgeTraversal->_next_edge->_target_id = node_id_2;
+    this->_number_of_edges++;
          //   cout<<"Criando aresta do no"<<No1->_id<<endl;
     }
   //  cout<<"aresta Criado"<<endl;
@@ -132,6 +138,8 @@ void Graph::print_graph()
         traversal=traversal->_next_node;
     }
     cout<<"Ultimo no:"<<this->_last->_id<<endl;
+    cout<<"Numero de Vertices:"<<this->_number_of_nodes<<endl;
+    cout<<"Numero de Arestas:"<<this->_number_of_edges<<endl;
 }
 
 void Graph::print_graph(std::ofstream& output_file)
