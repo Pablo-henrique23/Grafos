@@ -2,6 +2,7 @@
 #include "../include/Node.hpp"
 #include "../include/Edge.hpp"
 #include <iostream>
+#include <cstddef>
 #include <string>
 #include <sstream>
 
@@ -26,7 +27,7 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
     Node no;
     Node proximoNo;
     Edge aresta;
-    this->_number_of_edges =0;
+    this->_number_of_edges = 0;
     this->_number_of_nodes = 0;
     while (getline(instance, linha)){    
         // Deus nos ajude com stringstream
@@ -36,10 +37,12 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
         ss >> aresta._weight;
         add_node(no._id);
         add_node(proximoNo._id);
-        add_edge(no._id,proximoNo._id,aresta._weight);
-        add_edge(proximoNo._id,no._id,aresta._weight);
-            }
-    print_graph();
+        add_edge(no._id, proximoNo._id, aresta._weight);
+        if (direcionado == false){ // Se nao for direcionado, entao é uma via de mão dupla e precisa ter as duas arestas
+            add_edge(proximoNo._id, no._id, aresta._weight);
+        }
+    }
+    // print_graph();
    
 
 }
@@ -62,32 +65,32 @@ void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
 
 void Graph::add_node(size_t node_id, float weight)
 {
-if(this->_first==nullptr){
-    Node* firstNode = new Node();
-    _first = firstNode;
-    _first->_id = node_id;
-    this->_number_of_nodes++;
-}else{
-    Node* aux=_first;
-    bool jaExiste=false;
-    if(aux->_id==node_id){
-        jaExiste=true;
-    }
-    while(aux->_next_node!=NULL){     
-        aux = aux->_next_node;   
-          if(aux->_id==node_id){
+    if(this->_first==nullptr){
+        Node* firstNode = new Node();
+        _first = firstNode;
+        _first->_id = node_id;
+        this->_number_of_nodes++;
+    }else{
+        Node* aux=_first;
+        bool jaExiste=false;
+        if(aux->_id==node_id){
             jaExiste=true;
-            break;
         }
+        while(aux->_next_node!=nullptr){     
+            aux = aux->_next_node;   
+            if(aux->_id==node_id){
+                jaExiste=true;
+                break;
+            }
+        }
+        if(jaExiste){
+            return;
+        }
+        aux->_next_node = new Node();
+        aux->_next_node->_id = node_id;
+        this->_last = aux->_next_node;
+        this->_number_of_nodes++;
     }
-    if(jaExiste){
-        return;
-    }
-    aux->_next_node = new Node();
-    aux->_next_node->_id = node_id;
-   this->_last = aux->_next_node;
-       this->_number_of_nodes++;
-}
 }
 
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
@@ -95,22 +98,23 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
     Node* No1;
     Node* traversal=this->_first;
    // cout<<"Criando Edge"<<endl;
-    while(traversal!=NULL){
+    while(traversal!=nullptr){
         if(node_id_1==traversal->_id){
             No1 = traversal;
             break;
         }else{
-        traversal=traversal->_next_node;
+            traversal=traversal->_next_node;
         }
     }
-    if(No1->_first_edge==NULL){
-    No1->_first_edge = new Edge();
-    No1->_first_edge->_target_id = node_id_2;
-    this->_number_of_edges++;
-    //    cout<<"Criando primeira aresta do no"<<No1->_id<<endl;
+    if(No1->_first_edge==nullptr){
+        No1->_first_edge = new Edge();
+        No1->_first_edge->_target_id = node_id_2;
+        No1->_number_of_edges++; // check me
+        this->_number_of_edges++;
+        //    cout<<"Criando primeira aresta do no"<<No1->_id<<endl;
     }else{
         Edge* edgeTraversal=traversal->_first_edge;
-    while(edgeTraversal->_next_edge!=NULL){
+    while(edgeTraversal->_next_edge!=nullptr){
       //  cout<<"Contem aresta:"<<edgeTraversal->_target_id<<endl;
         edgeTraversal=edgeTraversal->_next_edge;
     }
@@ -124,14 +128,14 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
 
 void Graph::print_graph()
 {
-     cout<<"Imprimindo...";
+    cout<<"Imprimindo...";
     cout<<"Primeiro no:"<<this->_first->_id<<endl;
     Node* traversal=this->_first;
     Edge* edgeTraversal = traversal->_first_edge;
-    while(traversal!=NULL){
+    while(traversal!=nullptr){
         cout<<"Contem no:"<<traversal->_id<<endl;
         edgeTraversal = traversal->_first_edge;
-        while(edgeTraversal!=NULL){
+        while(edgeTraversal!=nullptr){
             cout<<"     Contem aresta:"<<traversal->_id<<"-"<<edgeTraversal->_target_id<<endl;
            edgeTraversal=edgeTraversal->_next_edge;
         }
@@ -148,5 +152,27 @@ void Graph::print_graph(std::ofstream& output_file)
 
 int Graph::conected(size_t node_id_1, size_t node_id_2)
 {
+    // passar de nó em nó, conferir se tem mais de 1 aresta e passar de aresta em aresta ate achar o alvo
+    // retorna 1 pra sim e 0 pra não. apenas pra nao trocar o retorno da função
+    // NOTA: **Aparentemente** funciona pra grafos direcionados também
+    if (this->_first == nullptr){ // aqui nao tem nem o primeiro nó, então ja para
+        return 0;
+    }
+    Node *no;
+    Edge *aresta;
+    Node *traversal = this->_first;
+    while (traversal != nullptr){
+        if (traversal->_id == node_id_1){
+            no = traversal;
+            aresta = no->_first_edge;
+            for (size_t i = 0; i < no->_number_of_edges; i++){
+                if (aresta->_target_id == node_id_2){
+                    return 1;
+                }
+                aresta = aresta->_next_edge;
+            }
+        }
+        traversal = traversal->_next_node;
+    }
     return 0;
 }
