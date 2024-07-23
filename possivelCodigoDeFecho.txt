@@ -1,0 +1,46 @@
+size_t* Graph::fecho_tran_direto(size_t node_id){
+// Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
+    
+    
+    vector<size_t> contatos;
+    vector<size_t> procurados;
+    contatos.push_back(node_id);
+    size_t j = 0;
+    Node* no;
+    Edge* aresta;
+    bool continuar = true;
+    while(sizeof(contatos) != 0){
+        for (size_t i = 0; i < sizeof(procurados); i++){
+            if (procurados[i] == node_id){
+                continuar=false;
+            }            
+        }
+        if (continuar==false){
+            continue;
+        }
+        
+
+        
+        no = search_for_node(contatos[j]);
+        aresta = no->_first_edge;
+        
+
+        for (size_t i = 0; i < no->_number_of_edges; i++)
+        {  // array[]
+            cout<<aresta->_target_id<<endl;
+            contatos.push_back(aresta->_target_id);
+            //adiciona no no array
+            aresta=aresta->_next_edge;
+            /* code */
+        }
+        procurados.push_back(contatos.back());
+        contatos.pop_back();
+    }
+    
+
+    // O processo para grafo direcionado e nao direcionado é diferente
+    
+
+    return nullptr;
+}
+

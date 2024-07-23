@@ -1,6 +1,7 @@
 #include "include/Graph.hpp"
 #include <iostream>
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -18,7 +19,7 @@ int menu() {
     cout << "[8] Arvore Geradora Minima - Kruskal " << endl;
     cout << "[9] Caminhamento em profundidade " << endl;
     cout << "[0] Sair" << endl;
-
+    cout << "Escolha: ";
     cin >> selecao;
 
     return selecao;
@@ -61,16 +62,21 @@ int main(int argc, char* argv[])
 
     Graph *grafo = new Graph(arquivo_entrada, direcionado, ponderado, peso_vertices);
     
-    // FAZER OS CASES PRA DAR SENTIDO AO menu() --> CTRL + C e V do Stenio, conferir se a luciana vai deixar
-
     int selecao = menu();
     switch (selecao){
-        case 1: // fecho transitivo direto de um vertice
-            size_t n;
-            cout << "Digite o ID do vértice: ";
-            cin >> n;
-            size_t* ftd = grafo->fecho_tran_direto(n);
-            cout << "\n" << ftd << endl;
+        // case 1: // fecho transitivo direto de um vertice
+        //     size_t n;
+        //     cout << "Digite o ID do vértice: ";
+        //     cin >> n;
+        //     size_t* ftd = grafo->fecho_tran_direto(n);
+        //     for (size_t i = 0; i < sizeof(ftd); i++){
+        //         cout << ftd[i] << " ";
+        //     }
+        //     cout << endl;
+        //     break;
+        case 1:
+            grafo->fecho_tran_direto(1);
+            break;
     }
 
     return 0;

@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <string>
 #include <sstream>
+#include <vector>
+#include <algorithm>
 
 using namespace std;
 // PERGUNTAR À PROFESSORA SE PODE ALTERAR OS PARÂMETROS DAS FUNÇÕES!!
@@ -121,6 +123,8 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
     edgeTraversal->_next_edge = new Edge();
     edgeTraversal->_next_edge->_target_id = node_id_2;
     this->_number_of_edges++;
+    No1->_number_of_edges++; // check me
+
          //   cout<<"Criando aresta do no"<<No1->_id<<endl;
     }
   //  cout<<"aresta Criado"<<endl;
@@ -181,16 +185,48 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 // REFAZER!!
 size_t* Graph::fecho_tran_direto(size_t node_id){
 // Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
-    // ve se o grafo tem algo
-    if (this->_first == nullptr){
+    
+    vector<size_t> contatos;
+    vector<size_t> procurados;
+
+    Node* no = this->search_for_node(node_id);
+    if (no == nullptr){
         return nullptr;
     }
-    // cria vetor inicializado em 0s
-    size_t* array[this->_number_of_nodes]; 
-    for (size_t j = 0; j < this->_number_of_nodes; j++){
-        array[j] = 0;
+
+    Edge* aresta = no->_first_edge;
+    while (true){
+        for (size_t i; i < no->_number_of_edges; i++){
+            contatos.push_back(aresta->_target_id);
+            aresta = aresta->_next_edge;
+        }
+        
+
     }
 
-// RESTO
-    return *array;
+}
+
+
+// Sempre que usar isso, confira se o retorno foi nullptr! Se nao for e voce tentar usar algum atributo,
+// vai dar core dumped
+// ex:
+// Node* busca = grafo->search_for_node(6);
+// if(busca != nullptr){
+//     cout << busca->_id << endl;
+// }
+Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar retorna o endereço dele
+    Node* no = new Node();
+    no = this->_first;
+    while(no->_next_node!=nullptr){     
+        if (no->_id == node_id){
+            return no;
+        }
+        no = no->_next_node;   
+    }
+    return nullptr;
+}
+
+bool Graph::taNoVetor(vector<size_t>& vetor, size_t node_id){
+    auto it = find(vetor.begin(), vetor.end(), node_id);
+    return (it != vetor.end());
 }
