@@ -8,7 +8,7 @@ int menu() {
     int selecao;
     cout << endl;
     cout << "   ------  MENU ------" << endl;
-    cout << "[1] Fecho transitivo direto de um vertice" << endl;
+    cout << "[1] Fecho transitivo direto de um vertice" << endl; // conjunto de vertices alcançaveis a partir de X
     cout << "[2] Fecho transitivo indireto de um vertice" << endl;
     cout << "[3] Coeficiente de agrupamento local de um vertice" << endl;
     cout << "[4] Coeficiente de agrupamento medio do grafo" << endl;
@@ -63,10 +63,15 @@ int main(int argc, char* argv[])
     
     // FAZER OS CASES PRA DAR SENTIDO AO menu() --> CTRL + C e V do Stenio, conferir se a luciana vai deixar
 
-    // int selecao = menu();
-    // switch (selecao){
-    //     case 1:
-    // }
+    int selecao = menu();
+    switch (selecao){
+        case 1: // fecho transitivo direto de um vertice
+            size_t n;
+            cout << "Digite o ID do vértice: ";
+            cin >> n;
+            size_t* ftd = grafo->fecho_tran_direto(n);
+            cout << "\n" << ftd << endl;
+    }
 
     return 0;
 }

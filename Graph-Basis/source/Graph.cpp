@@ -15,7 +15,7 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
     getline(instance, temp);
     
     // pega o tamanho da instancia em inteiro
-    this->_number_of_nodes = stoi(temp);
+    this->_number_of_nodes = stoi(temp); // stoi = string to int
     // adiciona outros parametros
     this->_directed = direcionado;
     this->_weighted_edges = weighted_edges;
@@ -141,9 +141,9 @@ void Graph::print_graph()
         }
         traversal=traversal->_next_node;
     }
-    cout<<"Ultimo no:"<<this->_last->_id<<endl;
-    cout<<"Numero de Vertices:"<<this->_number_of_nodes<<endl;
-    cout<<"Numero de Arestas:"<<this->_number_of_edges<<endl;
+    cout<<"Ultimo no:" << this->_last->_id<<endl;
+    cout<<"Numero de Vertices:" << this->_number_of_nodes << endl;
+    cout<<"Numero de Arestas:" << this->_number_of_edges << endl;
 }
 
 void Graph::print_graph(std::ofstream& output_file)
@@ -175,4 +175,22 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
         traversal = traversal->_next_node;
     }
     return 0;
+}
+
+
+// REFAZER!!
+size_t* Graph::fecho_tran_direto(size_t node_id){
+// Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
+    // ve se o grafo tem algo
+    if (this->_first == nullptr){
+        return nullptr;
+    }
+    // cria vetor inicializado em 0s
+    size_t* array[this->_number_of_nodes]; 
+    for (size_t j = 0; j < this->_number_of_nodes; j++){
+        array[j] = 0;
+    }
+
+// RESTO
+    return *array;
 }

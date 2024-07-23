@@ -22,6 +22,8 @@ public:
 
     int conected(size_t node_id_1, size_t node_id_2);
 
+    size_t* fecho_tran_direto(size_t node_id);
+
 private:
     size_t _number_of_nodes; // OK
     size_t _number_of_edges; 
