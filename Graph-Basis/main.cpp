@@ -75,8 +75,9 @@ int main(int argc, char* argv[])
         //     cout << endl;
         //     break;
         case 1:
-            grafo->fecho_tran_direto(1);
-            break;
+            grafo->teste();
+            // grafo->fecho_tran_direto(1);
+            // break;
     }
 
     return 0;

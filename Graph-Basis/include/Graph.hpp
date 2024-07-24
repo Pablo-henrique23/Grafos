@@ -24,9 +24,9 @@ public:
 
     void print_graph();
     Node* search_for_node(size_t node_id);
-    size_t* fecho_tran_direto(size_t node_id);
+    // vector<size_t> fecho_tran_direto(size_t node_id);
     bool taNoVetor(vector<size_t>& vetor, size_t node_id);
-
+    void teste();
 
 private:
     size_t _number_of_nodes;

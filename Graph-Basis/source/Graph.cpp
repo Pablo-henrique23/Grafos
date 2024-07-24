@@ -35,7 +35,9 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
         // Deus nos ajude com stringstream
         stringstream ss(linha);
         ss >> no._id;
+        aresta._source_id = no._id;
         ss >> proximoNo._id;
+        aresta._target_id = proximoNo._id;
         ss >> aresta._weight;
         add_node(no._id);
         add_node(proximoNo._id);
@@ -110,6 +112,9 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
     }
     if(No1->_first_edge==nullptr){
         No1->_first_edge = new Edge();
+
+        No1->_first_edge->_source_id = No1->_id; // check me pablo!
+
         No1->_first_edge->_target_id = node_id_2;
         No1->_number_of_edges++; // check me
         this->_number_of_edges++;
@@ -117,13 +122,13 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
     }else{
         Edge* edgeTraversal=traversal->_first_edge;
     while(edgeTraversal->_next_edge!=nullptr){
-      //  cout<<"Contem aresta:"<<edgeTraversal->_target_id<<endl;
+        //  cout<<"Contem aresta:"<<edgeTraversal->_target_id<<endl;
         edgeTraversal=edgeTraversal->_next_edge;
-    }
-    edgeTraversal->_next_edge = new Edge();
-    edgeTraversal->_next_edge->_target_id = node_id_2;
-    this->_number_of_edges++;
-    No1->_number_of_edges++; // check me
+        }
+        edgeTraversal->_next_edge = new Edge();
+        edgeTraversal->_next_edge->_target_id = node_id_2;
+        this->_number_of_edges++;
+        No1->_number_of_edges++; // check me
 
          //   cout<<"Criando aresta do no"<<No1->_id<<endl;
     }
@@ -183,28 +188,25 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 
 
 // REFAZER!!
-size_t* Graph::fecho_tran_direto(size_t node_id){
-// Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
+// vector<size_t> Graph::fecho_tran_direto(size_t node_id){
+// // Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
     
-    vector<size_t> contatos;
-    vector<size_t> procurados;
+//     vector<size_t> contatos;
+//     vector<size_t> procurados;
+//     vector<size_t> ftd;
 
-    Node* no = this->search_for_node(node_id);
-    if (no == nullptr){
-        return nullptr;
-    }
+//     Node* no = this->search_for_node(node_id);
+//     if (no == nullptr){
+//         return ftd;
+//     }
 
-    Edge* aresta = no->_first_edge;
-    while (true){
-        for (size_t i; i < no->_number_of_edges; i++){
-            contatos.push_back(aresta->_target_id);
-            aresta = aresta->_next_edge;
-        }
-        
+//     Node* aux = no;
+//     Edge* aresta = no->_first_edge;
+    
+    
+//     return ftd;
 
-    }
-
-}
+// }
 
 
 // Sempre que usar isso, confira se o retorno foi nullptr! Se nao for e voce tentar usar algum atributo,
@@ -229,4 +231,16 @@ Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar 
 bool Graph::taNoVetor(vector<size_t>& vetor, size_t node_id){
     auto it = find(vetor.begin(), vetor.end(), node_id);
     return (it != vetor.end());
+}
+
+void Graph::teste(){
+    Node *no = this->_first;
+    while (no->_next_node != nullptr){
+        Edge *aresta = no->_first_edge;
+        for (size_t i = 0; i < no->_number_of_edges; i++){
+            cout << aresta->_source_id << " --> " << aresta->_target_id<<endl;
+            aresta = aresta->_next_edge;
+        }
+        no = no->_next_node;
+    }
 }
