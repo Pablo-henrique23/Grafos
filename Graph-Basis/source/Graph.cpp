@@ -121,11 +121,13 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
         //    cout<<"Criando primeira aresta do no"<<No1->_id<<endl;
     }else{
         Edge* edgeTraversal=traversal->_first_edge;
-    while(edgeTraversal->_next_edge!=nullptr){
-        //  cout<<"Contem aresta:"<<edgeTraversal->_target_id<<endl;
-        edgeTraversal=edgeTraversal->_next_edge;
-        }
+        while(edgeTraversal->_next_edge!=nullptr){
+            //  cout<<"Contem aresta:"<<edgeTraversal->_target_id<<endl;
+            edgeTraversal=edgeTraversal->_next_edge;
+            }
         edgeTraversal->_next_edge = new Edge();
+
+        edgeTraversal->_next_edge->_source_id = node_id_1;
         edgeTraversal->_next_edge->_target_id = node_id_2;
         this->_number_of_edges++;
         No1->_number_of_edges++; // check me
@@ -233,14 +235,3 @@ bool Graph::taNoVetor(vector<size_t>& vetor, size_t node_id){
     return (it != vetor.end());
 }
 
-void Graph::teste(){
-    Node *no = this->_first;
-    while (no->_next_node != nullptr){
-        Edge *aresta = no->_first_edge;
-        for (size_t i = 0; i < no->_number_of_edges; i++){
-            cout << aresta->_source_id << " --> " << aresta->_target_id<<endl;
-            aresta = aresta->_next_edge;
-        }
-        no = no->_next_node;
-    }
-}
