@@ -222,7 +222,7 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar retorna o endereço dele
     Node* no = new Node();
     no = this->_first;
-    while(no->_next_node!=nullptr){     
+    while(no!=nullptr){     
         if (no->_id == node_id){
             return no;
         }
@@ -245,4 +245,41 @@ bool Graph::getWeighted_edges(){
 bool Graph::getWeighted_nodes(){
     return this->_weighted_nodes;
 }
+
+bool Graph::taNoGrafo(size_t no){
+    if (this->search_for_node(no) == nullptr){
+        return false;
+    }
+    return true;
+}
+
+vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
+    // como essa função funciona? faz um fuzuê entre arrays e retorna as edges que geram um sub Vert induzido
+    // com os IDs fornecidos.
+    // supoe-se que ja foi feita a validação quanto a repetição dos vertices e quanto a existencia deles no grafo
+    vector<Edge*> retorno;
+    vector<Node*> nos;
+    for (size_t i : vertices){ // gera um vetor de nos
+        Node* no = this->search_for_node(i);
+        nos.push_back(no);
+    }
+    for(Node* i : nos){
+        Edge* aresta = i->_first_edge;
+        while(aresta!=nullptr){
+            if (this->taNoVetor(vertices, aresta->_target_id)){
+                retorno.push_back(aresta);
+            }
+            aresta = aresta->_next_edge;
+        }
+    }
+    return retorno;
+
+}
+
+// so esboço. decidir como vai fazer ainda
+vector<Node> Graph::agmVerticeInduzidoKruskal(vector<Edge*> arestas){
+
+    vector<Node> retorno;
+}
+
 

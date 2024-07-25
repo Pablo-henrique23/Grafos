@@ -21,12 +21,15 @@ public:
     void add_edge(size_t node_id_1, size_t node_id_2, float weight = 0);
     void print_graph(std::ofstream& output_file);
     int conected(size_t node_id_1, size_t node_id_2);
-
     void print_graph();
+
     Node* search_for_node(size_t node_id);
     // vector<size_t> fecho_tran_direto(size_t node_id);
+    vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
+    vector<Node> agmVerticeInduzidoKruskal(vector<Edge*> vertices);
+
+    bool taNoGrafo(size_t id);
     bool taNoVetor(vector<size_t>& vetor, size_t node_id);
-    
     bool getDirected();
     bool getWeighted_edges();
     bool getWeighted_nodes();

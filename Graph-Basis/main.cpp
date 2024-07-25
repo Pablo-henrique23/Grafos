@@ -65,11 +65,50 @@ int main(int argc, char* argv[])
     int selecao = menu();
     switch (selecao){
         case 1:
-        if (grafo->getDirected() == false){
-            cout << "Operação inválida, grafo não direcionado.\n";
-        } else {
-            // faz fecho transitivo direto
-        }
+            if (grafo->getDirected() == false){
+                cout << "Operação inválida, grafo não direcionado.\n";
+            } else {
+                // faz fecho transitivo direto
+            }
+            break;
+
+
+        // uma Árvore Geradora Mínima sobre o subgrafo vértice-induzido por X usando o algoritmo de Kruskal;
+        case 8:// está incompleto
+            vector<size_t> vertices; // vai armazenar os IDs dos vertices pra fazer o subgrafo vertice induzido
+            size_t v; // vai ser usado pra ler o ID do nó
+            cout << "Digite o indice de cada vértice para gerar o grafo vértice-induzido (0 para parar): ";
+            while (true){ // enquanto 0 nao for digitado, continua lendo 
+                cin >> v; // le o id do nó
+
+                if (v == 0){
+                    // terminou de digitar os vertices
+                    cout << "OK\n";
+                    vector<Edge*> arestas = grafo->gerarVerticeInduzido(vertices);
+                    for(Edge* i : arestas){
+                        cout << i->_source_id << " -> " << i->_target_id << endl;
+                    }
+                    // for (size_t i : vertices){
+                    //     cout << i << " ";
+                    // }
+                    // VALIDAR SE DA PRA FAZER O SUBGRAFO
+                    // vector<Node> agm = grafo->agmVerticeInduzidoKruskal(vertices);  
+                    // FAZ A FUNÇÃO
+                    return 0;
+                } else {
+                    if (grafo->taNoVetor(vertices, v)){ // autoexplicativo
+                        cout << "Vertice repetido detectado, ignorando.\n";
+                        continue; // pula a iteração
+                    }
+
+                    if (!(grafo->taNoGrafo(v))){ // se nao estiver no grafo e nem for 0, entao é realmente inválido (0 nunca vai ser encontrado, por isso a dupla condição)
+                        cout << "\n Nó inválido detectado, ignorando.\n";
+                        continue;
+                    }
+                    vertices.push_back(v); // insere V no vetor que vai fazer o subgrafo vertice-induzido
+                }
+
+            }
     }
 
     return 0;
