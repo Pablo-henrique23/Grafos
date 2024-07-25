@@ -191,7 +191,8 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 
 // REFAZER!!
 // vector<size_t> Graph::fecho_tran_direto(size_t node_id){
-// // Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
+// Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
+// a especificação do trabalho fala que isso é pra grafo *direcionado*, entao imagino que nao precise de fazer validação
     
 //     vector<size_t> contatos;
 //     vector<size_t> procurados;
@@ -233,5 +234,15 @@ Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar 
 bool Graph::taNoVetor(vector<size_t>& vetor, size_t node_id){
     auto it = find(vetor.begin(), vetor.end(), node_id);
     return (it != vetor.end());
+}
+
+bool Graph::getDirected(){
+    return this->_directed;
+}
+bool Graph::getWeighted_edges(){
+    return this->_weighted_edges;
+}
+bool Graph::getWeighted_nodes(){
+    return this->_weighted_nodes;
 }
 

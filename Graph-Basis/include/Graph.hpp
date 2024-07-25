@@ -26,6 +26,11 @@ public:
     Node* search_for_node(size_t node_id);
     // vector<size_t> fecho_tran_direto(size_t node_id);
     bool taNoVetor(vector<size_t>& vetor, size_t node_id);
+    
+    bool getDirected();
+    bool getWeighted_edges();
+    bool getWeighted_nodes();
+
 
 private:
     size_t _number_of_nodes;

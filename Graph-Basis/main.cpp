@@ -64,20 +64,12 @@ int main(int argc, char* argv[])
     
     int selecao = menu();
     switch (selecao){
-        // case 1: // fecho transitivo direto de um vertice
-        //     size_t n;
-        //     cout << "Digite o ID do vértice: ";
-        //     cin >> n;
-        //     size_t* ftd = grafo->fecho_tran_direto(n);
-        //     for (size_t i = 0; i < sizeof(ftd); i++){
-        //         cout << ftd[i] << " ";
-        //     }
-        //     cout << endl;
-        //     break;
         case 1:
-            grafo->teste();
-            // grafo->fecho_tran_direto(1);
-            // break;
+        if (grafo->getDirected() == false){
+            cout << "Operação inválida, grafo não direcionado.\n";
+        } else {
+            // faz fecho transitivo direto
+        }
     }
 
     return 0;
