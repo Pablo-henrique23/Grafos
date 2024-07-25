@@ -7,6 +7,9 @@ using namespace std;
 
 int menu() {
     int selecao;
+    bool again;
+    do{
+        again = false;
     cout << endl;
     cout << "   ------  MENU ------" << endl;
     cout << "[1] Fecho transitivo direto de um vertice" << endl; // conjunto de vertices alcançaveis a partir de X
@@ -21,7 +24,12 @@ int menu() {
     cout << "[0] Sair" << endl;
     cout << "Escolha: ";
     cin >> selecao;
-
+    if(!cin){
+        again = true;
+        cin.clear();
+        cin.ignore();
+    }
+}while(again);
     return selecao;
 }
 
@@ -61,17 +69,30 @@ int main(int argc, char* argv[])
     }
 
     Graph *grafo = new Graph(arquivo_entrada, direcionado, ponderado, peso_vertices);
-    
+    bool exit=false;
+    while(!exit){
     int selecao = menu();
     switch (selecao){
+        case 0:
+        exit = true;
+        break;
         case 1:
             if (grafo->getDirected() == false){
                 cout << "Operação inválida, grafo não direcionado.\n";
             } else {
-                // faz fecho transitivo direto
+                cout<<"digite o id do No desejado:";
+                size_t id;
+                cin>>id;
+                if(cin){
+                      grafo->fecho_tran_direto(id);
+                }else{
+                    cout<<"digite um numero";
+                }
+                  //  grafo->print_graph();
             }
             break;
-
+        case 2:
+        break;
 
         // uma Árvore Geradora Mínima sobre o subgrafo vértice-induzido por X usando o algoritmo de Kruskal;
         case 8:// está incompleto
@@ -96,7 +117,7 @@ int main(int argc, char* argv[])
                     // FAZ A FUNÇÃO
                     return 0;
                 } else {
-                    if (grafo->taNoVetor(vertices, v)){ // autoexplicativo
+                    if (grafo->ta_no_vetor(vertices, v)){ // autoexplicativo
                         cout << "Vertice repetido detectado, ignorando.\n";
                         continue; // pula a iteração
                     }
@@ -109,7 +130,7 @@ int main(int argc, char* argv[])
                 }
 
             }
-    }
+    }}
 
     return 0;
 }

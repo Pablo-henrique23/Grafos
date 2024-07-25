@@ -189,27 +189,57 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 }
 
 
-// REFAZER!!
-// vector<size_t> Graph::fecho_tran_direto(size_t node_id){
-// Aqui a intenção é fazer um array com todos os nós alcançáveis a partir de `node_id`
-// a especificação do trabalho fala que isso é pra grafo *direcionado*, entao imagino que nao precise de fazer validação
+vector<size_t> Graph::fecho_tran_direto(size_t node_id){
     
-//     vector<size_t> contatos;
-//     vector<size_t> procurados;
-//     vector<size_t> ftd;
+    vector<size_t> noContatos;
+    vector<size_t> noProcurados;
+    vector<size_t> final;
+    if(search_for_node(node_id)==nullptr){
+    cout<<"digite um No valido";
+    return final;
+    }
+    noContatos.push_back(node_id);
+    size_t no_id_inicial=node_id;
+    Node* no;
+    Edge* aresta;
+    while(!noContatos.empty()){
+        bool taNoVetor = ta_no_vetor(noProcurados,node_id);     
+        if (taNoVetor){
+            noContatos.pop_back();
+            continue;
+        }           
+        no = search_for_node(noContatos.back());
+        aresta = no->_first_edge;
+        node_id = no->_id;
+        if(no_id_inicial!=noContatos.back()){
 
-//     Node* no = this->search_for_node(node_id);
-//     if (no == nullptr){
-//         return ftd;
-//     }
+        final.push_back(noContatos.back());
+        }
+        noContatos.pop_back();
+        for (size_t i = 0; i < no->_number_of_edges; i++)
+        {  
+            noContatos.push_back(aresta->_target_id);
+            aresta=aresta->_next_edge;
+        }
 
-//     Node* aux = no;
-//     Edge* aresta = no->_first_edge;
+        noProcurados.push_back(noContatos.front());
+    }
+    if(final.size()==0){
+        cout<<"No "<< no_id_inicial<<" nao possui contato com ninguem"<<endl;
+    }else{
+
     
+    for (size_t i = 0; i < final.size(); i++)
+    {
+        cout<<"Nos em contato com o No "<<no_id_inicial<<":"<<final[i]<<endl;
+    }
+    }
     
-//     return ftd;
+    // O processo para grafo direcionado e nao direcionado é diferente
+    
 
-// }
+    return final;
+}
 
 
 // Sempre que usar isso, confira se o retorno foi nullptr! Se nao for e voce tentar usar algum atributo,
@@ -231,9 +261,15 @@ Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar 
     return nullptr;
 }
 
-bool Graph::taNoVetor(vector<size_t>& vetor, size_t node_id){
-    auto it = find(vetor.begin(), vetor.end(), node_id);
-    return (it != vetor.end());
+bool Graph::ta_no_vetor(vector<size_t>& vetor, size_t node_id){
+    for (size_t i = 0; i < vetor.size(); i++)
+    {   if(vetor[i]==node_id){
+        return true;
+    }
+    }
+    return false;
+    
+
 }
 
 bool Graph::getDirected(){
@@ -266,7 +302,7 @@ vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
     for(Node* i : nos){
         Edge* aresta = i->_first_edge;
         while(aresta!=nullptr){
-            if (this->taNoVetor(vertices, aresta->_target_id)){
+            if (this->ta_no_vetor(vertices, aresta->_target_id)){
                 retorno.push_back(aresta);
             }
             aresta = aresta->_next_edge;
@@ -277,9 +313,9 @@ vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
 }
 
 // so esboço. decidir como vai fazer ainda
-vector<Node> Graph::agmVerticeInduzidoKruskal(vector<Edge*> arestas){
+// vector<Node> Graph::agmVerticeInduzidoKruskal(vector<Edge*> arestas){
 
-    vector<Node> retorno;
-}
+//     vector<Node> retorno;
+// }
 
 
