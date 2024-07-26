@@ -114,7 +114,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
         No1->_first_edge = new Edge();
 
         No1->_first_edge->_source_id = No1->_id; // check me pablo!
-
+        No1->_first_edge->_weight = weight;
         No1->_first_edge->_target_id = node_id_2;
         No1->_number_of_edges++; // check me
         this->_number_of_edges++;
@@ -128,6 +128,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
         edgeTraversal->_next_edge = new Edge();
 
         edgeTraversal->_next_edge->_source_id = node_id_1;
+        edgeTraversal->_next_edge->_weight = weight;
         edgeTraversal->_next_edge->_target_id = node_id_2;
         this->_number_of_edges++;
         No1->_number_of_edges++; // check me
@@ -262,14 +263,29 @@ Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar 
 }
 
 bool Graph::ta_no_vetor(vector<size_t>& vetor, size_t node_id){
-    for (size_t i = 0; i < vetor.size(); i++)
-    {   if(vetor[i]==node_id){
-        return true;
-    }
+    for (size_t i = 0; i < vetor.size(); i++){   
+        if(vetor[i]==node_id){
+            return true;
+        }
     }
     return false;
-    
+}
 
+bool Graph::node_no_vetor(vector<Node*>& vetor, Node* node){
+    for (size_t i = 0; i < vetor.size(); i++){
+        if(vetor[i]==node){
+            return true;
+        }
+    }
+    return false;
+}
+bool Graph::aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta){
+    for (size_t i = 0; i < vetor.size(); i++){
+        if(vetor[i]==aresta){
+            return true;
+        }
+    }
+    return false;
 }
 
 bool Graph::getDirected(){
@@ -280,6 +296,10 @@ bool Graph::getWeighted_edges(){
 }
 bool Graph::getWeighted_nodes(){
     return this->_weighted_nodes;
+}
+
+size_t Graph::getNumberOfNodes(){
+    return this->_number_of_nodes;
 }
 
 bool Graph::taNoGrafo(size_t no){
@@ -308,14 +328,35 @@ vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
             aresta = aresta->_next_edge;
         }
     }
+    // cout << retorno.size() << endl;
     return retorno;
 
 }
 
-// so esboço. decidir como vai fazer ainda
-// vector<Node> Graph::agmVerticeInduzidoKruskal(vector<Edge*> arestas){
+// so esboço. decidir como vai fazer ainda. 
+vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
 
-//     vector<Node> retorno;
-// }
+    // bota em ordem por peso
+    sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;}); 
+    vector<Edge*> retorno; // arestas que serão retornadas
+    vector<size_t> envolvidos; // ids de nós envolvidos
+    size_t peso_total = 0;
+    // para cada aresta
+    for(Edge* aresta : arestas){
+        // se a aresta nao ta no retorno e o source dela nao ta nos envolvidos
+        if(!aresta_no_vetor(retorno, aresta) && (!ta_no_vetor(envolvidos, aresta->_source_id))){
+            retorno.push_back(aresta); // coloca a aresta no retorno
+            envolvidos.push_back(aresta->_source_id); // coloca a source nos envolvidos
+            peso_total += aresta->_weight; // atualiza o peso
+        }
+    }
+    // mostra o retorno, pode tirar se quiser (ai tem que colocar pra mostrar na main)
+    for(Edge* i : retorno){
+        cout << i->_source_id << " -> " << i->_target_id << " com peso " << i->_weight << endl;
+    }
+    cout << endl;
+    cout << "Custo total: " << peso_total << endl;
+    return retorno;
+}
 
 

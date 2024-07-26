@@ -24,13 +24,18 @@ public:
     void print_graph();
 
     Node* search_for_node(size_t node_id);
-vector<size_t> fecho_tran_direto(size_t node_id);
+    vector<size_t> fecho_tran_direto(size_t node_id);
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
-    vector<Node> agmVerticeInduzidoKruskal(vector<Edge*> vertices);
+    Node* gerarArvoreIsolada(Node* no);
+    vector<Edge*> agmKruskal(vector<Edge*> vertices);
 
     bool taNoGrafo(size_t id);
     bool ta_no_vetor(vector<size_t>& vetor, size_t node_id);
+    bool node_no_vetor(vector<Node*>& vetor, Node* node);
+    bool aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta);
+ 
     bool getDirected();
+    size_t getNumberOfNodes();
     bool getWeighted_edges();
     bool getWeighted_nodes();
 
