@@ -88,12 +88,7 @@ int main(int argc, char* argv[])
                     for(Edge* i : arestas){
                         cout << i->_source_id << " -> " << i->_target_id << endl;
                     }
-                    // for (size_t i : vertices){
-                    //     cout << i << " ";
-                    // }
-                    // VALIDAR SE DA PRA FAZER O SUBGRAFO
-                    // vector<Node> agm = grafo->agmVerticeInduzidoKruskal(vertices);  
-                    // FAZ A FUNÇÃO
+                    
                     return 0;
                 } else {
                     if (grafo->taNoVetor(vertices, v)){ // autoexplicativo
