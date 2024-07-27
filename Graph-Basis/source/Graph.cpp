@@ -7,6 +7,7 @@
 #include <sstream>
 #include <vector>
 #include <algorithm>
+#include <queue>
 
 using namespace std;
 // PERGUNTAR À PROFESSORA SE PODE ALTERAR OS PARÂMETROS DAS FUNÇÕES!!
@@ -19,6 +20,7 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
     // pega o tamanho da instancia em inteiro
     this->_number_of_nodes = stoi(temp); // stoi = string to int
     // adiciona outros parametros
+    adj.resize(this->_number_of_nodes);
     this->_directed = direcionado;
     this->_weighted_edges = weighted_edges;
     this->_weighted_nodes = weighted_nodes;
@@ -58,7 +60,45 @@ Graph::Graph()
 Graph::~Graph()
 {
 }
+size_t Graph::dijkstra(size_t origem, size_t destino){
+    if(search_for_node(origem)==nullptr||search_for_node(destino)==nullptr)
+    {
+        return 0;
+    }  
+    size_t distancias[this->_number_of_nodes];
+    size_t visitados[this->_number_of_nodes];
+    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> fila;
+    
+    for(size_t i = 0; i < this->_number_of_nodes; i++)
+		{
+			distancias[i] = 999999999;
+			visitados[i] = false;//mudar para 0 ou 1
+		}
+    distancias[origem] = 0;
+    fila.push(make_pair(distancias[origem], origem));
+    while(!fila.empty())
+	{
+		pair<int, int> p = fila.top(); 
+		int vertice = p.second;
+		fila.pop(); 
 
+		if(visitados[vertice] == false)
+		{
+		visitados[vertice] = true;
+	        for (int i = 0; i < adj[vertice].size(); i++) {
+            size_t v = adj[vertice][i].first;
+            size_t custo_da_aresta = adj[vertice][i].second;
+            if (distancias[v] > (distancias[vertice] + custo_da_aresta)) 
+            {
+            distancias[v] = distancias[vertice] + custo_da_aresta;
+            fila.push(make_pair(distancias[v], v));
+            }
+            }
+		}
+	}
+		return distancias[destino];
+	
+}
 void Graph::remove_node(size_t node_position)
 {
 }
@@ -98,9 +138,10 @@ void Graph::add_node(size_t node_id, float weight)
 }
 
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
-{
+{  
     Node* No1;
     Node* traversal=this->_first;
+     adj[node_id_1].push_back(make_pair(node_id_2, weight));
    // cout<<"Criando Edge"<<endl;
     while(traversal!=nullptr){
         if(node_id_1==traversal->_id){

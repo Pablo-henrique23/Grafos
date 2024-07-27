@@ -14,13 +14,13 @@ int menu() {
     cout << "   ------  MENU ------" << endl;
     cout << "[1] Fecho transitivo direto de um vertice" << endl; // conjunto de vertices alcançaveis a partir de X
     cout << "[2] Fecho transitivo indireto de um vertice" << endl;
-    cout << "[3] Caminho mínimo entre dois vértices - Dijkstra" << endl;
-    cout << "[4] Caminho mínimo entre dois vértices - Floyd" << endl;
-    cout << "[5] Árvore Geradora Mínima de subgrafo vértice-induzido - Prim" << endl;
-    cout << "[6] Árvore Geradora Mínima de subgrafo vértice-induzido - Kruskal" << endl;
-    cout << "[7] Árvore dada pela ordem do caminhamento em profundidade a partir de um vértice" << endl;
-    cout << "[8] Raio, centro, diâmetro e periferia do grafo" << endl;
-    cout << "[9] Conjunto de vértices de articulação" << endl;
+    cout << "[3] Caminho minimo entre dois vertices - Dijkstra" << endl;
+    cout << "[4] Caminho minimo entre dois vertices - Floyd" << endl;
+    cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl;
+    cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl;
+    cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl;
+    cout << "[8] Raio, centro, diametro e periferia do grafo" << endl;
+    cout << "[9] Conjunto de vertices de articulacao" << endl;
     cout << "[0] Sair" << endl;
     cout << "Escolha: ";
     cin >> selecao;
@@ -93,7 +93,23 @@ int main(int argc, char* argv[])
                 break;
             case 2:
                 break;
-
+            case 3:
+            size_t origem;
+            size_t destino;
+            cout<<"Digite a origem:";
+            cin>>origem;
+            cout<<"Digite o destino:";
+            cin>>destino;
+            size_t resposta;
+            resposta= grafo->dijkstra(origem,destino);
+            if(resposta==0){
+            cout<<"Um dos vertices digitados nao existe.";
+            } else if(resposta>0){
+            cout<<"dijkstra:"<<resposta;
+            }else if(resposta==999999999){
+                cout<<"Nao foi encontrado caminho";
+            }
+            break;
             // uma Árvore Geradora Mínima sobre o subgrafo vértice-induzido por X usando o algoritmo de Kruskal;
             case 6:
                 if(!grafo->getWeighted_edges()){
