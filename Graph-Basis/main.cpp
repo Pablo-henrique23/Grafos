@@ -94,21 +94,21 @@ int main(int argc, char* argv[])
             case 2:
                 break;
             case 3:
-            size_t origem;
-            size_t destino;
-            cout<<"Digite a origem:";
-            cin>>origem;
-            cout<<"Digite o destino:";
-            cin>>destino;
-            size_t resposta;
-            resposta= grafo->dijkstra(origem,destino);
-            if(resposta==0){
-            cout<<"Um dos vertices digitados nao existe.";
-            } else if(resposta>0){
-            cout<<"dijkstra:"<<resposta;
-            }else if(resposta==999999999){
-                cout<<"Nao foi encontrado caminho";
-            }
+                size_t origem;
+                size_t destino;
+                cout<<"Digite a origem:";
+                cin>>origem;
+                cout<<"Digite o destino:";
+                cin>>destino;
+                size_t resposta;
+                resposta= grafo->dijkstra(origem,destino);
+                if(resposta==0){
+                    cout<<"Um dos vertices digitados nao existe.";
+                } else if(resposta>0){
+                    cout<<"dijkstra:"<<resposta;
+                }else if(resposta==999999999){
+                    cout<<"Nao foi encontrado caminho";
+                }
             break;
             // uma Árvore Geradora Mínima sobre o subgrafo vértice-induzido por X usando o algoritmo de Kruskal;
             case 6:
@@ -124,6 +124,32 @@ int main(int argc, char* argv[])
 
                     if (v == 0){
                         // terminou de digitar os vertices
+                        if(vertices.size() == 0){
+                            cout << "Nenhum vértice inserido, saindo.\n";
+                            break;
+                        }
+			            bool valido = false;
+			            vector<Node*> nos;
+			            for(size_t v : vertices){
+                            nos.push_back(grafo->search_for_node(v));
+            			}
+                        vector<size_t> validados;
+                        validados.push_back(nos[0]->_id);
+                        for(Node* no : nos){
+                            for(Edge *aresta = no->_first_edge; aresta != nullptr; aresta = aresta->_next_edge){
+                                if (!grafo->ta_no_vetor(validados, aresta->_target_id) && grafo->ta_no_vetor(vertices, aresta->_target_id)){
+                                    validados.push_back(aresta->_target_id);
+                                }
+                            }
+                        }
+                        if (validados.size() == vertices.size()){
+                            valido = true;
+                        }
+                        if(!valido){
+                            cout << "Conjunto de vértices impossível de ligar. Saindo.\n";
+                            break;
+                        }
+
                         vector<Edge*> arestas = grafo->gerarVerticeInduzido(vertices);
                         if (arestas.size() == 0){
                             cout << "As arestas que ligam os vértices fornecidos não foram encontradas. Saindo.\n";
@@ -131,8 +157,7 @@ int main(int argc, char* argv[])
                         }
                         
                         grafo->agmKruskal(arestas);
-                        
-                        return 0;
+                    	break;    
                     } else {
                         if (grafo->ta_no_vetor(vertices, v)){ // autoexplicativo
                             cout << "Vertice repetido detectado, ignorando.\n";
@@ -140,14 +165,16 @@ int main(int argc, char* argv[])
                         }
 
                         if (!(grafo->taNoGrafo(v))){ // se nao estiver no grafo e nem for 0, entao é realmente inválido (0 nunca vai ser encontrado, por isso a dupla condição)
-                            cout << "\n Nó inválido detectado, ignorando.\n";
+                            cout << "Nó inválido detectado, ignorando.\n";
                             continue;
                         }
                         vertices.push_back(v); // insere V no vetor que vai fazer o subgrafo vertice-induzido
                     }
 
                 }
-        }}
+                break;
+        }
+    }
 
     return 0;
 }

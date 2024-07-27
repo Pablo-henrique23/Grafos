@@ -351,6 +351,8 @@ bool Graph::taNoGrafo(size_t no){
 }
 
 vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
+	// NOTA PRO PABLO (henrique): validar quando nao da pra fazer o grafo
+
     // como essa função funciona? faz um fuzuê entre arrays e retorna as edges que geram um sub Vert induzido
     // com os IDs fornecidos.
     // supoe-se que ja foi feita a validação quanto a repetição dos vertices e quanto a existencia deles no grafo
@@ -392,6 +394,7 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
         }
     }
     // mostra o retorno, pode tirar se quiser (ai tem que colocar pra mostrar na main)
+    cout << endl;
     for(Edge* i : retorno){
         cout << i->_source_id << " -> " << i->_target_id << " com peso " << i->_weight << endl;
     }
