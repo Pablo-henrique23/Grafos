@@ -113,6 +113,7 @@ void Graph::add_node(size_t node_id, float weight)
         Node* firstNode = new Node();
         _first = firstNode;
         _first->_id = node_id;
+        firstNode->_visitado = false;
         this->_number_of_nodes++;
     }else{
         Node* aux=_first;
@@ -121,7 +122,7 @@ void Graph::add_node(size_t node_id, float weight)
             jaExiste=true;
         }
         while(aux->_next_node!=nullptr){     
-            aux = aux->_next_node;   
+            aux = aux->_next_node;
             if(aux->_id==node_id){
                 jaExiste=true;
                 break;
@@ -133,6 +134,7 @@ void Graph::add_node(size_t node_id, float weight)
         aux->_next_node = new Node();
         aux->_next_node->_id = node_id;
         this->_last = aux->_next_node;
+        aux->_next_node->_visitado = false;
         this->_number_of_nodes++;
     }
 }
@@ -351,9 +353,7 @@ bool Graph::taNoGrafo(size_t no){
 }
 
 vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
-	// NOTA PRO PABLO (henrique): validar quando nao da pra fazer o grafo
-
-    // como essa função funciona? faz um fuzuê entre arrays e retorna as edges que geram um sub Vert induzido
+    // faz um fuzuê entre arrays e retorna as edges que geram um sub Vert induzido
     // com os IDs fornecidos.
     // supoe-se que ja foi feita a validação quanto a repetição dos vertices e quanto a existencia deles no grafo
     vector<Edge*> retorno;
@@ -376,7 +376,45 @@ vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
 
 }
 
-// so esboço. decidir como vai fazer ainda. 
+vector<Edge*> Graph::agmPrim(vector<Edge*> arestas, size_t nNos){
+    vector<Edge*> retorno;
+    vector<size_t> envolvidos;
+    sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
+    int i = 0;
+    size_t peso_total = 0;
+    while (retorno.size() != nNos - 1){
+        for(Edge* aresta : arestas){
+            if (i == 0){
+                envolvidos.push_back(aresta->_source_id);
+                i++;
+            }
+            if(aresta->_source_id != aresta->_target_id){
+                if(ta_no_vetor(envolvidos, aresta->_source_id) && !ta_no_vetor(envolvidos, aresta->_target_id)){
+                    envolvidos.push_back(aresta->_target_id);
+                    retorno.push_back(aresta);
+                    peso_total += aresta->_weight;
+                    continue;
+                }
+                if(!ta_no_vetor(envolvidos, aresta->_source_id) && ta_no_vetor(envolvidos, aresta->_target_id)){
+                    envolvidos.push_back(aresta->_source_id);
+                    retorno.push_back(aresta);
+                    peso_total += aresta->_weight;
+                    continue;
+                }
+            }
+	    }
+    }
+    cout << endl;
+    cout << retorno.size() << endl;
+    for(Edge* i : retorno){
+        cout << i->_source_id << " -> " << i->_target_id << " com peso " << i->_weight << endl;
+    }
+    cout << endl;
+    cout << "Custo total: " << peso_total << endl;
+    return retorno;
+}
+
+
 vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
 
     // bota em ordem por peso
@@ -387,10 +425,12 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
     // para cada aresta
     for(Edge* aresta : arestas){
         // se a aresta nao ta no retorno e o source dela nao ta nos envolvidos
-        if(!aresta_no_vetor(retorno, aresta) && (!ta_no_vetor(envolvidos, aresta->_source_id))){
-            retorno.push_back(aresta); // coloca a aresta no retorno
-            envolvidos.push_back(aresta->_source_id); // coloca a source nos envolvidos
-            peso_total += aresta->_weight; // atualiza o peso
+        if(aresta->_source_id != aresta->_target_id){
+            if(!aresta_no_vetor(retorno, aresta) && (!ta_no_vetor(envolvidos, aresta->_source_id))){
+                retorno.push_back(aresta); // coloca a aresta no retorno
+                envolvidos.push_back(aresta->_source_id); // coloca a source nos envolvidos
+                peso_total += aresta->_weight; // atualiza o peso
+            }
         }
     }
     // mostra o retorno, pode tirar se quiser (ai tem que colocar pra mostrar na main)
@@ -404,3 +444,25 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
 }
 
 
+
+void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj do grafo e salva ele no arquivo de saida (txt) fornecido
+    for(Node* no = this->_first; no != nullptr; no = no->_next_node){
+        if(no->_next_node != nullptr){
+            cout << no->_id << " -> ";
+            arquivo_saida << no->_id << " -> ";
+        } else {
+            cout << no->_id << " -> X\n";
+            arquivo_saida << no->_id << " -> X\n";
+        }
+        for(Edge* aresta = no->_first_edge; aresta != nullptr; aresta = aresta->_next_edge){
+            if(aresta->_next_edge == nullptr){
+                cout << aresta->_target_id << " -> X ";
+                arquivo_saida << aresta->_target_id << " -> X \n";
+            } else {
+                cout << aresta->_target_id << " -> ";
+                arquivo_saida << aresta->_target_id << " -> ";
+            }
+        }
+        cout << endl;
+    }
+}

@@ -27,9 +27,10 @@ public:
 
     Node* search_for_node(size_t node_id);
     vector<size_t> fecho_tran_direto(size_t node_id);
+    Node* gerarArvoreIsolada(Node* no); // fazer ainda (se precisar) -> ajuda pra recursividade
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
-    Node* gerarArvoreIsolada(Node* no);
-    vector<Edge*> agmKruskal(vector<Edge*> vertices);
+    vector<Edge*> agmKruskal(vector<Edge*> arestas);
+    vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
 
     bool taNoGrafo(size_t id);
     bool ta_no_vetor(vector<size_t>& vetor, size_t node_id);
@@ -40,7 +41,9 @@ public:
     size_t getNumberOfNodes();
     bool getWeighted_edges();
     bool getWeighted_nodes();
-
+    
+    void lista_adjacencia(ofstream& arquivo_saida);
+    
 
 private:
     size_t _number_of_nodes;
