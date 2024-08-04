@@ -101,11 +101,97 @@ size_t Graph::dijkstra(size_t origem, size_t destino){
 }
 void Graph::remove_node(size_t node_position)
 {
+    Node* nodeToRemove = search_for_node(node_position);
+    if (nodeToRemove == nullptr) {
+        cout << "Nó não encontrado no grafo!" << endl;
+        return;
+    }
+
+    // Remover todas as arestas conectadas ao nó
+    while (nodeToRemove->_first_edge != nullptr) {
+        remove_edge(node_position, nodeToRemove->_first_edge->_target_id);
+    }
+
+    // Remover o nó da lista de nós
+    if (nodeToRemove == this->_first) {
+        this->_first = nodeToRemove->_next_node;
+        if (this->_first != nullptr) {
+            this->_first->_previous_node = nullptr;
+        }
+    } else if (nodeToRemove == this->_last) {
+        this->_last = nodeToRemove->_previous_node;
+        if (this->_last != nullptr) {
+            this->_last->_next_node = nullptr;
+        }
+    } else {
+        nodeToRemove->_previous_node->_next_node = nodeToRemove->_next_node;
+        if (nodeToRemove->_next_node != nullptr) {
+            nodeToRemove->_next_node->_previous_node = nodeToRemove->_previous_node;
+        }
+    }
+
+    delete nodeToRemove;
+    this->_number_of_nodes--;
+    cout << "Nó removido com sucesso!" << endl;
+}
+    void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
+{
+    Node* No1 = search_for_node(node_position_1);
+    if (No1 == nullptr) {
+        cout << "Nó de origem não encontrado no grafo!" << endl;
+        return;
+    }
+
+    Node* No2 = search_for_node(node_position_2);
+    if (No2 == nullptr) {
+        cout << "Nó de destino não encontrado no grafo!" << endl;
+        return;
+    }
+
+    // Remover a aresta do nó de origem
+    Edge* prevEdge = nullptr;
+    Edge* edgeTraversal = No1->_first_edge;
+
+    while (edgeTraversal != nullptr) {
+        if (edgeTraversal->_target_id == node_position_2) {
+            if (prevEdge == nullptr) {
+                No1->_first_edge = edgeTraversal->_next_edge;
+            } else {
+                prevEdge->_next_edge = edgeTraversal->_next_edge;
+            }
+            delete edgeTraversal;
+            No1->_number_of_edges--;
+            this->_number_of_edges--;
+            cout << "Aresta removida do nó de origem com sucesso!" << endl;
+            break;
+        }
+        prevEdge = edgeTraversal;
+        edgeTraversal = edgeTraversal->_next_edge;
+    }
+
+    // Remover a aresta do nó de destino (apenas para grafos não direcionados)
+    if (!this->_directed) {
+        prevEdge = nullptr;
+        edgeTraversal = No2->_first_edge;
+
+        while (edgeTraversal != nullptr) {
+            if (edgeTraversal->_target_id == node_position_1) {
+                if (prevEdge == nullptr) {
+                    No2->_first_edge = edgeTraversal->_next_edge;
+                } else {
+                    prevEdge->_next_edge = edgeTraversal->_next_edge;
+                }
+                delete edgeTraversal;
+                No2->_number_of_edges--;
+                cout << "Aresta removida do nó de destino com sucesso!" << endl;
+                break;
+            }
+            prevEdge = edgeTraversal;
+            edgeTraversal = edgeTraversal->_next_edge;
+        }
+    }
 }
 
-void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
-{
-}
 
 void Graph::add_node(size_t node_id, float weight)
 {
