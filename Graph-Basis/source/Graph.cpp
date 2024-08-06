@@ -95,7 +95,7 @@ void Graph::remove_node(size_t node_position)
     this->_number_of_nodes--;
     cout << "Nó removido com sucesso!" << endl;
 }
-    void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
+void Graph::remove_edge(size_t node_position_1, size_t node_position_2)
 {
     Node* No1 = search_for_node(node_position_1);
     if (No1 == nullptr) {
