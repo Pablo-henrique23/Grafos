@@ -12,14 +12,14 @@ int menu() {
         again = false;
         cout << endl;
         cout << "   ------  MENU ------" << endl;
-        cout << "[1] Fecho transitivo direto de um vertice" << endl; // conjunto de vertices alcançaveis a partir de X
-        cout << "[2] Fecho transitivo indireto de um vertice" << endl;
+        cout << "[1] Fecho transitivo direto de um vertice" << endl; // conjunto de vertices alcançaveis a partir de X -> feito
+        cout << "[2] Fecho transitivo indireto de um vertice" << endl; // conjunto de vertices que alcançam X
         cout << "[3] Caminho minimo entre dois vertices - Dijkstra" << endl;
         cout << "[4] Caminho minimo entre dois vertices - Floyd" << endl;
-        cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl;
-        cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl;
-        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl;
-        cout << "[8] Raio, centro, diametro e periferia do grafo" << endl;
+        cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl; // feito (conferir erros)
+        cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl; // feito (conferir erros)
+        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // implementar arvore -> recursividade
+        cout << "[8] Raio, centro, diametro e periferia do grafo" << endl; 
         cout << "[9] Conjunto de vertices de articulacao" << endl;
         cout << "[0] Sair" << endl;
         cout << "Escolha: ";
