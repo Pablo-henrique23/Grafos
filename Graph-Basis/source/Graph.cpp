@@ -371,6 +371,73 @@ vector<size_t> Graph::fecho_tran_direto(size_t node_id){
     return final;
 }
 
+vector<size_t> Graph::fecho_tran_indireto(size_t node_id)
+{
+    vector<size_t> noContatos;
+    vector<size_t> noProcurados;
+    vector<size_t> final;
+
+    if (search_for_node(node_id) == nullptr)
+    {
+        cout << "Digite um Nó válido" << endl;
+        return final;
+    }
+
+    noContatos.push_back(node_id);
+    size_t no_id_inicial = node_id;
+
+    while (!noContatos.empty())
+    {
+        node_id = noContatos.back();
+        noContatos.pop_back();
+
+        if (ta_no_vetor(noProcurados, node_id))
+        {
+            continue;
+        }
+
+        Node* no = search_for_node(node_id);
+        if (no == nullptr)
+        {
+            continue;
+        }
+
+        noProcurados.push_back(node_id);
+
+        if (no_id_inicial != node_id)
+        {
+            final.push_back(node_id);
+        }
+
+        Edge* aresta = no->_first_edge;
+        while (aresta != nullptr)
+        {
+            if (!ta_no_vetor(noProcurados, aresta->_target_id))
+            {
+                noContatos.push_back(aresta->_target_id);
+            }
+            aresta = aresta->_next_edge;
+        }
+    }
+
+    if (final.empty())
+    {
+        cout << "Nó " << no_id_inicial << " não possui contato com ninguém" << endl;
+    }
+    else
+    {
+        cout << "Nós em contato com o Nó " << no_id_inicial << ":";
+        for (size_t i = 0; i < final.size(); i++)
+        {
+            cout << " " << final[i];
+        }
+        cout << endl;
+    }
+
+    return final;
+}
+
+
 
 // Sempre que usar isso, confira se o retorno foi nullptr! Se nao for e voce tentar usar algum atributo,
 // vai dar core dumped

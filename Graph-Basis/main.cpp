@@ -101,6 +101,21 @@ int main(int argc, char* argv[])
             }
             case 2:
             {
+                if (grafo->getDirected() == true) {
+                    cout<<"\nDigite o id do No desejado: ";
+                    size_t id;
+                    cin>>id;
+                    if(cin){
+                        grafo->fecho_tran_indireto(id);
+                    }else{
+                        cout<<"\nEntrada inválida. Digite um numero: ";
+                        cin.clear();
+                        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                    }
+                    //  grafo->print_graph();
+                } else {
+                    cout << "Operação inválida, grafo direcionado";
+                }
                 break;
             }
             case 3:

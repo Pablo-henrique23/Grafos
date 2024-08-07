@@ -27,6 +27,7 @@ public:
 
     Node* search_for_node(size_t node_id);
     vector<size_t> fecho_tran_direto(size_t node_id);
+    vector<size_t> fecho_tran_indireto(size_t node_id);
     Node* gerarArvoreIsolada(Node* no); // fazer ainda (se precisar) -> ajuda pra recursividade
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
     vector<Edge*> agmKruskal(vector<Edge*> arestas);
