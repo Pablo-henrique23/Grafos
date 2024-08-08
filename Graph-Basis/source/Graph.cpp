@@ -373,10 +373,11 @@ vector<size_t> Graph::fecho_tran_direto(size_t node_id){
 
 vector<size_t> Graph::fecho_tran_indireto(size_t node_id)
 {
-    vector<size_t> noContatos;
-    vector<size_t> noProcurados;
-    vector<size_t> final;
+    vector<size_t> noContatos;    // FALTANTES
+    vector<size_t> noProcurados;  // OLHADOS
+    vector<size_t> final;         // FINAL
 
+    // VERIFICA SE EXISTE
     if (search_for_node(node_id) == nullptr)
     {
         cout << "Digite um Nó válido" << endl;
@@ -391,42 +392,46 @@ vector<size_t> Graph::fecho_tran_indireto(size_t node_id)
         node_id = noContatos.back();
         noContatos.pop_back();
 
+        // VERIFICA SE JÁ FOI PROCURADO E CONTINUA
         if (ta_no_vetor(noProcurados, node_id))
         {
             continue;
         }
 
-        Node* no = search_for_node(node_id);
-        if (no == nullptr)
-        {
-            continue;
-        }
-
+        // MARCA O NO
         noProcurados.push_back(node_id);
 
+        // SE NAO FOR O INICIAL, ADICIONA NA RESPOSTA
         if (no_id_inicial != node_id)
         {
             final.push_back(node_id);
         }
 
-        Edge* aresta = no->_first_edge;
-        while (aresta != nullptr)
+        // PERCORRE TODOS OS NÓS A PARTIR DO PRIMIRO DO GRAFO
+        Node* no_atual = this->_first; 
+        while (no_atual != nullptr)
         {
-            if (!ta_no_vetor(noProcurados, aresta->_target_id))
+            Edge* aresta = no_atual->_first_edge;
+            while (aresta != nullptr)
             {
-                noContatos.push_back(aresta->_target_id);
+                // VERIFICA SE TEM CAMINHO ATE O NÓ 
+                if (aresta->_target_id == node_id && !ta_no_vetor(noProcurados, no_atual->_id))
+                {
+                    noContatos.push_back(no_atual->_id);
+                }
+                aresta = aresta->_next_edge;
             }
-            aresta = aresta->_next_edge;
+            no_atual = no_atual->_next_node;
         }
     }
 
     if (final.empty())
     {
-        cout << "Nó " << no_id_inicial << " não possui contato com ninguém" << endl;
+        cout << "Nó " << no_id_inicial << " não pode ser alcançado por nenhum outro nó" << endl;
     }
     else
     {
-        cout << "Nós em contato com o Nó " << no_id_inicial << ":";
+        cout << "Nós que podem alcançar o Nó " << no_id_inicial << ":";
         for (size_t i = 0; i < final.size(); i++)
         {
             cout << " " << final[i];
