@@ -1,4 +1,4 @@
-#define infinito 65535
+#define infinito 99999//65535
 #include "../include/Graph.hpp"
 #include "../include/Node.hpp"
 #include "../include/Edge.hpp"
@@ -18,6 +18,24 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
     getline(instance, temp);
     // pega o tamanho da instancia em inteiro
     this->_number_of_nodes = stoi(temp); // stoi = string to int
+    
+    // cria e inicializa matriz de adjacencia 
+    this->matriz_adj = new size_t*[this->_number_of_nodes];
+    for (size_t i = 1; i < this->_number_of_nodes; i++){
+        this->matriz_adj[i] = new size_t[this->_number_of_nodes];
+    }
+    for (size_t i = 1; i < this->_number_of_nodes; i++){
+        for(size_t j = 1; j < this->_number_of_nodes; j++){
+            if(i != j){
+                this->matriz_adj[i][j] = infinito;
+            } else {
+                this->matriz_adj[i][j] = 0;
+            }
+            
+        }
+    }
+    // -----------
+
     // adiciona outros parametros
     adj.resize(this->_number_of_nodes);
     this->_directed = direcionado;
@@ -32,6 +50,7 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
     Edge aresta;
     this->_number_of_edges = 0;
     this->_number_of_nodes = 0;
+
     while (getline(instance, linha)){    
         // Deus nos ajude com stringstream
         stringstream ss(linha);
@@ -40,12 +59,14 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
         ss >> proximoNo._id;
         aresta._target_id = proximoNo._id;
         ss >> aresta._weight;
-
         add_node(no._id);
         add_node(proximoNo._id);
         add_edge(no._id, proximoNo._id, aresta._weight);
+
+        this->matriz_adj[no._id][proximoNo._id] = aresta._weight;
         if (direcionado == false){ // Se nao for direcionado, entao é uma via de mão dupla e precisa ter as duas arestas
             cout << aresta._weight << endl;
+            this->matriz_adj[proximoNo._id][no._id] = aresta._weight;
             add_edge(proximoNo._id, no._id, aresta._weight); // DANDO SEG FAULT
 
         }
@@ -555,5 +576,18 @@ void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj 
             }
         }
         cout << endl;
+    }
+}
+
+void Graph::printa_matriz_adj(){
+    for (size_t i = 1; i < this->_number_of_nodes; i++){
+        cout << "\t" << i;
+    }
+    cout << endl;
+    for (size_t i = 1; i < this->_number_of_nodes; i++){
+        cout << "\n" << i;
+        for (size_t j = 1; j < this->_number_of_nodes; j++){
+            cout << "\t" << this->matriz_adj[i][j];
+        }
     }
 }

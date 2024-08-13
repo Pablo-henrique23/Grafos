@@ -43,6 +43,7 @@ public:
     bool getWeighted_nodes();
     
     void lista_adjacencia(ofstream& arquivo_saida);
+    void printa_matriz_adj();
     
 
 private:
@@ -53,6 +54,7 @@ private:
     bool   _weighted_nodes;
     Node  *_first;
     Node  *_last;
+    size_t** matriz_adj;
     vector<vector<pair<int, int>>> adj;
 };
 

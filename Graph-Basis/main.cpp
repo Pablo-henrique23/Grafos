@@ -8,7 +8,6 @@ using namespace std;
 int menu() {
     int selecao;
     bool again;
-    cout << "MENU\n";
     do{
         again = false;
         cout << endl;
@@ -226,6 +225,11 @@ int main(int argc, char* argv[]){
             {
                 grafo->lista_adjacencia(arquivo_saida);
                 cout << "Salvando lista no arquivo de saída fornecido\n";
+                break;
+            }
+            case 100:
+            {
+                grafo->printa_matriz_adj();
                 break;
             }
         }
