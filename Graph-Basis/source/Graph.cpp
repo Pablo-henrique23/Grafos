@@ -1,3 +1,4 @@
+#define infinito 65535
 #include "../include/Graph.hpp"
 #include "../include/Node.hpp"
 #include "../include/Edge.hpp"
@@ -10,13 +11,11 @@
 #include <queue>
 
 using namespace std;
-// PERGUNTAR À PROFESSORA SE PODE ALTERAR OS PARÂMETROS DAS FUNÇÕES!!
 Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes)
 {
     // Pega a primeira linha e joga pra tamanhoInstância (a 1° linha é o tamanho da instancia do grafo, check README.txt)
     string temp; // temporario pra ser usado na função getline()
     getline(instance, temp);
-    
     // pega o tamanho da instancia em inteiro
     this->_number_of_nodes = stoi(temp); // stoi = string to int
     // adiciona outros parametros
@@ -41,16 +40,18 @@ Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, boo
         ss >> proximoNo._id;
         aresta._target_id = proximoNo._id;
         ss >> aresta._weight;
+
         add_node(no._id);
         add_node(proximoNo._id);
         add_edge(no._id, proximoNo._id, aresta._weight);
         if (direcionado == false){ // Se nao for direcionado, entao é uma via de mão dupla e precisa ter as duas arestas
-            add_edge(proximoNo._id, no._id, aresta._weight);
+            cout << aresta._weight << endl;
+            add_edge(proximoNo._id, no._id, aresta._weight); // DANDO SEG FAULT
+
         }
     }
+    // fazer matriz de incidencia aqui para facilitar possiveis contas
     // print_graph();
-   
-
 }
 
 Graph::Graph()
@@ -186,12 +187,12 @@ void Graph::add_node(size_t node_id, float weight)
     }
 }
 
-void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
+void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight) // DANDO SEG FAULT
 {  
     Node* No1;
     Node* traversal=this->_first;
-     adj[node_id_1].push_back(make_pair(node_id_2, weight));
-   // cout<<"Criando Edge"<<endl;
+    // adj[node_id_1].push_back(make_pair(node_id_2, weight));
+    // cout<<"Criando Edge"<<endl;
     while(traversal!=nullptr){
         if(node_id_1==traversal->_id){
             No1 = traversal;
@@ -214,7 +215,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
         while(edgeTraversal->_next_edge!=nullptr){
             //  cout<<"Contem aresta:"<<edgeTraversal->_target_id<<endl;
             edgeTraversal=edgeTraversal->_next_edge;
-            }
+        }
         edgeTraversal->_next_edge = new Edge();
 
         edgeTraversal->_next_edge->_source_id = node_id_1;
@@ -223,7 +224,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight)
         this->_number_of_edges++;
         No1->_number_of_edges++; // check me
 
-         //   cout<<"Criando aresta do no"<<No1->_id<<endl;
+        //   cout<<"Criando aresta do no"<<No1->_id<<endl;
     }
   //  cout<<"aresta Criado"<<endl;
 }
@@ -273,7 +274,7 @@ size_t Graph::dijkstra(size_t origem, size_t destino){
 		if(visitados[vertice] == false)
 		{
 		visitados[vertice] = true;
-	        for (int i = 0; i < adj[vertice].size(); i++) {
+	        for (size_t i = 0; i < adj[vertice].size(); i++) {
             size_t v = adj[vertice][i].first;
             size_t custo_da_aresta = adj[vertice][i].second;
             if (distancias[v] > (distancias[vertice] + custo_da_aresta)) 
@@ -491,9 +492,10 @@ vector<Edge*> Graph::agmPrim(vector<Edge*> arestas, size_t nNos){
 	    }
     }
     cout << endl;
-    cout << retorno.size() << endl;
+    sort(retorno.begin(), retorno.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_source_id < aresta2->_source_id;});
+    cout << "Árvore Geradora Mínima composta pelas arestas\n";
     for(Edge* i : retorno){
-        cout << i->_source_id << " -> " << i->_target_id << " com peso " << i->_weight << endl;
+        cout << "(" << i->_source_id << ", " << i->_target_id << ") ";
     }
     cout << endl;
     cout << "Custo total: " << peso_total << endl;
@@ -521,11 +523,14 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
     }
     // mostra o retorno, pode tirar se quiser (ai tem que colocar pra mostrar na main)
     cout << endl;
-    for(Edge* i : retorno){
-        cout << i->_source_id << " -> " << i->_target_id << " com peso " << i->_weight << endl;
+
+    // coloca em ordem
+    sort(retorno.begin(), retorno.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_source_id < aresta2->_source_id;});
+    cout << "Árvore Geradora Mínima composta pelas arestas\n";
+    for (Edge* i : retorno){
+        cout << "(" << i->_source_id << ", " << i->_target_id << ") ";
     }
-    cout << endl;
-    cout << "Custo total: " << peso_total << endl;
+    cout << "\nCusto total: " << peso_total << endl;
     return retorno;
 }
 

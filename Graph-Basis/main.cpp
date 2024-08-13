@@ -8,6 +8,7 @@ using namespace std;
 int menu() {
     int selecao;
     bool again;
+    cout << "MENU\n";
     do{
         again = false;
         cout << endl;
@@ -34,8 +35,7 @@ int menu() {
     }
 
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]){
     if (argc != 6){ // Argc == 6 significa que a linha de comando dada foi ./<executavel> <arquivo-entrada> <arquivo-saida> <direcionado (0-1)> <ponderado (0-1)> <peso-nos-vertices (0-1)>
         cout << "Argumentos insuficientes. O comando deve ser './<executavel> <arquivo-entrada> <arquivo-saida> <direcionado (0-1)> <ponderado (0-1)> <peso-nos-vertices (0-1)>'.\n";
         return 0;
@@ -70,7 +70,6 @@ int main(int argc, char* argv[])
     if (pv == "1"){
         peso_vertices = true;
     }
-
     Graph *grafo = new Graph(arquivo_entrada, direcionado, ponderado, peso_vertices);
     bool exit=false;
     while(!exit){
@@ -115,7 +114,7 @@ int main(int argc, char* argv[])
                 resposta= grafo->dijkstra(origem,destino);
                 if(resposta==0){
                     cout<<"Um dos vertices digitados nao existe.";
-                }else if(resposta==999999999){
+                } else if (resposta==999999999){
                     cout<<"Nao foi encontrado caminho";
                 } else if(resposta>0){
                     cout<<"dijkstra:"<<resposta;
