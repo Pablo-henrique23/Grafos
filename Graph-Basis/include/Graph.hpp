@@ -11,7 +11,7 @@ class Graph
 public:
     /*Assinatura dos métodos básicos para o funcionamento da classe*/
 
-    Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes);
+    Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes);
     Graph();
     ~Graph();
 
@@ -21,27 +21,31 @@ public:
     void add_edge(size_t node_id_1, size_t node_id_2, float weight = 0);
     void print_graph(std::ofstream& output_file);
     int conected(size_t node_id_1, size_t node_id_2);
-    size_t dijkstra(size_t orig, size_t dest);
     void print_graph();
 
 
-    Node* search_for_node(size_t node_id);
+    size_t dijkstra(size_t orig, size_t dest);
     vector<size_t> fecho_tran_direto(size_t node_id);
-    Node* gerarArvoreIsolada(Node* no); // fazer ainda (se precisar) -> ajuda pra recursividade
-    vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
     vector<Edge*> agmKruskal(vector<Edge*> arestas);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
 
+    vector<size_t> arvore_caminho_profundidade(size_t noInicial);
+    void caminho_profundidade(vector<size_t> &retorno, size_t noInicial);
+    vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
+    Node* gerarArvoreIsolada(Node* no); // fazer ainda (se precisar) -> ajuda pra recursividade
+    Node* search_for_node(size_t node_id);
     bool taNoGrafo(size_t id);
     bool ta_no_vetor(vector<size_t>& vetor, size_t node_id);
     bool node_no_vetor(vector<Node*>& vetor, Node* node);
     bool aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta);
  
+
     bool getDirected();
     size_t getNumberOfNodes();
     bool getWeighted_edges();
     bool getWeighted_nodes();
     
+
     void lista_adjacencia(ofstream& arquivo_saida);
     void printa_matriz_adj();
     

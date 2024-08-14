@@ -11,7 +11,7 @@
 #include <queue>
 
 using namespace std;
-Graph::Graph(std::ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes)
+Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes)
 {
     // Pega a primeira linha e joga pra tamanhoInstância (a 1° linha é o tamanho da instancia do grafo, check README.txt)
     string temp; // temporario pra ser usado na função getline()
@@ -555,7 +555,27 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
     return retorno;
 }
 
+vector<size_t> Graph::arvore_caminho_profundidade(size_t noInicial){
+    // inicializa tudo em falso por garantia --> se so o construtor fizer isso, a segunda vez que for usar o [7] vai dar errado
+    for(Node* no = this->_first; no!=nullptr; no = no->_next_node){
+        no->_visitado = false;
+    }
+    vector<size_t> retorno;
+    this->caminho_profundidade(retorno, noInicial);
+    return retorno;
+}
 
+void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
+    Node* no = search_for_node(noInicial);
+    no->_visitado = true;
+    retorno.push_back(no->_id);
+    for(Edge* aresta = no->_first_edge; aresta != nullptr; aresta=aresta->_next_edge){
+        Node* aux = search_for_node(aresta->_target_id);
+        if (!aux->_visitado){
+            caminho_profundidade(retorno, aux->_id);
+        }
+    }
+}
 
 void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj do grafo e salva ele no arquivo de saida (txt) fornecido
     for(Node* no = this->_first; no != nullptr; no = no->_next_node){

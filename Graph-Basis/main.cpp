@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
     }
 
     string nomeArquivoSaida = argv[2];
-    ofstream arquivo_saida(nomeArquivoSaida);
+    ofstream arquivo_saida(nomeArquivoSaida, ios::app);
 
     // pega as outras informações e transforma em booleanos
     bool direcionado = false;
@@ -209,8 +209,49 @@ int main(int argc, char* argv[]){
                 }
                 break;
             }
-            case 7:
+            case 7: // caminhamento em profundidade a partir do vertice V
             {
+                size_t v = 0;
+                while(true){
+                    cout << "Digite o ID do vértice: ";
+                    cin >> v;
+                    cout << endl;
+                    if (!grafo->taNoGrafo(v)){
+                        cout << "Vertice inválido.\n";
+                    } else {
+                        break;
+                    }
+                }
+                vector<size_t> resultado = grafo->arvore_caminho_profundidade(v);
+                size_t ultimo = resultado.back();
+                for (size_t t : resultado){
+                    if(t != ultimo){
+                        cout << t << " -> ";
+                    } else {
+                        cout << t;
+                    }
+                }
+                char salvar = 'w';
+                while (salvar != 's' || salvar != 'n'){
+                    cout << "\nSalvar no arquivo de saida (s/n)? ";
+                    cin >> salvar;
+                    if(salvar == 's'){
+                        cout << "\nResultado salvo\n";
+                        // salvar resultado no arquivo
+                        arquivo_saida << "\n====== Caminhamento em Profundidade a partir do nó " << v << " ======\n";
+                        for (size_t t : resultado){
+                            if(t != ultimo){
+                                arquivo_saida << t << " -> ";
+                            } else {
+                                arquivo_saida << t << "\n" ;
+                            }
+                        }
+                        break;
+                    } else if (salvar == 'n'){
+                        cout << "\nOk.";
+                        break;
+                    }
+                }
                 break;
             }
             case 8:
