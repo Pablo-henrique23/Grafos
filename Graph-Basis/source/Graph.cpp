@@ -20,12 +20,12 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     this->_number_of_nodes = stoi(temp); // stoi = string to int
     
     // cria e inicializa matriz de adjacencia 
-    this->matriz_adj = new size_t*[this->_number_of_nodes];
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
-        this->matriz_adj[i] = new size_t[this->_number_of_nodes];
+    this->matriz_adj = new size_t*[this->_number_of_nodes+1];
+    for (size_t i = 1; i < this->_number_of_nodes+1; i++){
+        this->matriz_adj[i] = new size_t[this->_number_of_nodes+1];
     }
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
-        for(size_t j = 1; j < this->_number_of_nodes; j++){
+    for (size_t i = 1; i < this->_number_of_nodes+1; i++){
+        for(size_t j = 1; j < this->_number_of_nodes+1; j++){
             if(i != j){
                 this->matriz_adj[i][j] = infinito;
             } else {
@@ -212,7 +212,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight) // DANDO 
 {  
     Node* No1;
     Node* traversal=this->_first;
-    // adj[node_id_1].push_back(make_pair(node_id_2, weight));
+    adj[node_id_1].push_back(make_pair(node_id_2, weight));
     // cout<<"Criando Edge"<<endl;
     while(traversal!=nullptr){
         if(node_id_1==traversal->_id){
@@ -273,7 +273,7 @@ void Graph::print_graph()
 size_t Graph::dijkstra(size_t origem, size_t destino){
     if(search_for_node(origem)==nullptr||search_for_node(destino)==nullptr)
     {
-        return 0;
+        return infinito;
     }  
     size_t distancias[this->_number_of_nodes];
     size_t visitados[this->_number_of_nodes];
@@ -281,7 +281,7 @@ size_t Graph::dijkstra(size_t origem, size_t destino){
     
     for(size_t i = 0; i < this->_number_of_nodes; i++)
 		{
-			distancias[i] = 999999999;
+			distancias[i] = infinito;
 			visitados[i] = false;//mudar para 0 ou 1
 		}
     distancias[origem] = 0;
@@ -577,6 +577,53 @@ void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
     }
 }
 
+vector<size_t> Graph::raio_e_diametro(size_t** matriz){
+    vector<size_t> retorno;
+    // vector<size_t> centro;
+    // vector<size_t> periferia;
+    size_t raio = infinito, diametro = 0;
+    
+    for(size_t i = 1 ; i <= this->_number_of_nodes; i++){
+        for(size_t j = 1; j <= this->_number_of_nodes; j++){
+            if(matriz[i][j] == infinito){
+                continue;
+            }
+            if(i != j){
+                if (matriz[i][j] > diametro){
+                    diametro = matriz[i][j];
+                }
+                if (matriz[i][j] < raio){
+                    raio = matriz[i][j];
+                }
+            }
+        }
+    }
+    
+    retorno.push_back(raio);
+    retorno.push_back(diametro);
+    return retorno;
+    
+}
+
+vector<vector<size_t>> Graph::determinar_centro_e_periferia(size_t** matriz, size_t raio, size_t diametro){
+    vector<vector<size_t>> retorno;
+    vector<size_t> periferia; // == diametro
+    vector<size_t> centro; // == raio
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
+        for(size_t j = 1; j <= this->_number_of_nodes; j++){
+            if(matriz[i][j] == diametro){
+                periferia.push_back(i);
+            }
+            if(matriz[i][j] == raio){
+                centro.push_back(i);
+            }
+        }
+    }
+    retorno.push_back(centro);
+    retorno.push_back(periferia);
+    return retorno;
+}
+
 void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj do grafo e salva ele no arquivo de saida (txt) fornecido
     for(Node* no = this->_first; no != nullptr; no = no->_next_node){
         if(no->_next_node != nullptr){
@@ -600,13 +647,13 @@ void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj 
 }
 
 void Graph::printa_matriz_adj(){
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
         cout << "\t" << i;
     }
     cout << endl;
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
         cout << "\n" << i;
-        for (size_t j = 1; j < this->_number_of_nodes; j++){
+        for (size_t j = 1; j <= this->_number_of_nodes; j++){
             cout << "\t" << this->matriz_adj[i][j];
         }
     }

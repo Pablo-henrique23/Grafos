@@ -28,10 +28,12 @@ public:
     vector<size_t> fecho_tran_direto(size_t node_id);
     vector<Edge*> agmKruskal(vector<Edge*> arestas);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
-
     vector<size_t> arvore_caminho_profundidade(size_t noInicial);
     void caminho_profundidade(vector<size_t> &retorno, size_t noInicial);
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
+    vector<size_t> raio_e_diametro(size_t** matriz);
+    vector<vector<size_t>> determinar_centro_e_periferia(size_t** matriz, size_t raio, size_t diametro);
+
     Node* gerarArvoreIsolada(Node* no); // fazer ainda (se precisar) -> ajuda pra recursividade
     Node* search_for_node(size_t node_id);
     bool taNoGrafo(size_t id);
