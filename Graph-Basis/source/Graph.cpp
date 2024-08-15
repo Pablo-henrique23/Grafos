@@ -37,7 +37,7 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     // -----------
 
     // adiciona outros parametros
-    adj.resize(this->_number_of_nodes);
+    adj.resize(this->_number_of_nodes+1);
     this->_directed = direcionado;
     this->_weighted_edges = weighted_edges;
     this->_weighted_nodes = weighted_nodes;
@@ -63,10 +63,10 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
         add_node(proximoNo._id);
         add_edge(no._id, proximoNo._id, aresta._weight);
 
-        this->matriz_adj[no._id][proximoNo._id] = aresta._weight;
+        //this->matriz_adj[no._id][proximoNo._id] = aresta._weight;//REMOVIDO POIS JÁ EXISTE LISTA DE ADJACENCIA
         if (direcionado == false){ // Se nao for direcionado, entao é uma via de mão dupla e precisa ter as duas arestas
             cout << aresta._weight << endl;
-            this->matriz_adj[proximoNo._id][no._id] = aresta._weight;
+          //this->matriz_adj[proximoNo._id][no._id] = aresta._weight; REMOVIDO POIS JÁ EXISTE LISTA DE ADJACENCIA
             add_edge(proximoNo._id, no._id, aresta._weight); // DANDO SEG FAULT
 
         }
@@ -212,8 +212,11 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight) // DANDO 
 {  
     Node* No1;
     Node* traversal=this->_first;
-    // adj[node_id_1].push_back(make_pair(node_id_2, weight));
-    // cout<<"Criando Edge"<<endl;
+    cout<<"node_id_1"<<node_id_1<<endl;
+    cout<<"node_id_2"<<node_id_2<<endl;
+    cout<<"weight"<<weight<<endl;
+     adj[node_id_1].push_back(make_pair(node_id_2, weight));
+     cout<<"Criando Edge"<<endl;
     while(traversal!=nullptr){
         if(node_id_1==traversal->_id){
             No1 = traversal;
@@ -270,19 +273,21 @@ void Graph::print_graph()
     cout<<"Numero de Arestas:" << this->_number_of_edges << endl;
 }
 
-size_t Graph::dijkstra(size_t origem, size_t destino){
+pair<size_t,string> Graph::dijkstra(size_t origem, size_t destino){
     if(search_for_node(origem)==nullptr||search_for_node(destino)==nullptr)
     {
-        return 0;
+        return {0,""};
     }  
     size_t distancias[this->_number_of_nodes];
     size_t visitados[this->_number_of_nodes];
+    int predecessor[this->_number_of_nodes];
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> fila;
     
     for(size_t i = 0; i < this->_number_of_nodes; i++)
 		{
 			distancias[i] = 999999999;
 			visitados[i] = false;//mudar para 0 ou 1
+                predecessor[i] = -1;  // -1 indica que o nó não tem predecessor
 		}
     distancias[origem] = 0;
     fila.push(make_pair(distancias[origem], origem));
@@ -301,12 +306,19 @@ size_t Graph::dijkstra(size_t origem, size_t destino){
             if (distancias[v] > (distancias[vertice] + custo_da_aresta)) 
             {
             distancias[v] = distancias[vertice] + custo_da_aresta;
+            predecessor[v] = vertice;  // Atualiza o predecessor
             fila.push(make_pair(distancias[v], v));
             }
             }
 		}
 	}
-		return distancias[destino];
+    string caminho;
+for (int at = destino; at != -1; at = predecessor[at]) {
+    caminho=to_string(at)+ (caminho.empty() ? "" : " -> ")+caminho;
+}
+
+
+		return {distancias[destino],caminho};
 	
 }
 void Graph::print_graph(std::ofstream& output_file)

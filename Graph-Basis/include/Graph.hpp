@@ -24,7 +24,7 @@ public:
     void print_graph();
 
 
-    size_t dijkstra(size_t orig, size_t dest);
+    pair<size_t,string> dijkstra(size_t orig, size_t dest);
     vector<size_t> fecho_tran_direto(size_t node_id);
     vector<Edge*> agmKruskal(vector<Edge*> arestas);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);

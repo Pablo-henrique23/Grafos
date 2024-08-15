@@ -109,14 +109,15 @@ int main(int argc, char* argv[]){
                 cin>>origem;
                 cout<<"Digite o destino:";
                 cin>>destino;
-                size_t resposta;
+                pair<size_t,string> resposta;
                 resposta= grafo->dijkstra(origem,destino);
-                if(resposta==0){
+                if(resposta.first==0){
                     cout<<"Um dos vertices digitados nao existe.";
-                } else if (resposta==999999999){
+                } else if (resposta.first==999999999){
                     cout<<"Nao foi encontrado caminho";
-                } else if(resposta>0){
-                    cout<<"dijkstra:"<<resposta;
+                } else if(resposta.first>0){
+                    cout<<"dijkstra:"<<resposta.second<<endl;
+                    cout<<"custo:"<<resposta.first<<endl;
                 }
             break;
             }
