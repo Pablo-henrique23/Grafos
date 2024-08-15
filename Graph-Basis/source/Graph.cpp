@@ -577,7 +577,7 @@ void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
     }
 }
 
-vector<size_t> Graph::raio_e_diametro(size_t** matriz){
+vector<size_t> Graph::raio_e_diametro(size_t** matriz){ // CONSERTAR! CONCEITO TA ERRADO
     vector<size_t> retorno;
     // vector<size_t> centro;
     // vector<size_t> periferia;
