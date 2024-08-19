@@ -233,11 +233,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight) // DANDO 
 {  
     Node* No1;
     Node* traversal=this->_first;
-    cout<<"node_id_1"<<node_id_1<<endl;
-    cout<<"node_id_2"<<node_id_2<<endl;
-    cout<<"weight"<<weight<<endl;
      adj[node_id_1].push_back(make_pair(node_id_2, weight));
-     cout<<"Criando Edge"<<endl;
     while(traversal!=nullptr){
         if(node_id_1==traversal->_id){
             No1 = traversal;

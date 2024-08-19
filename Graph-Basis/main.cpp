@@ -116,7 +116,7 @@ int main(int argc, char* argv[]){
                 resposta= grafo->dijkstra(origem,destino);
                 if(resposta.first==0){
                     cout<<"Um dos vertices digitados nao existe.";
-                } else if (resposta==infinito){
+                } else if (resposta.first==infinito){
                     cout<<"Nao foi encontrado caminho";
                 } else if(resposta.first>0){
                     cout<<"dijkstra:"<<resposta.second<<endl;
@@ -268,7 +268,7 @@ int main(int argc, char* argv[]){
                 for (size_t i = 1; i <= grafo->getNumberOfNodes(); i++){
                     for(size_t j = 1; j <= grafo->getNumberOfNodes(); j++){
                         if(i != j){
-                            matriz[i][j] = grafo->dijkstra(i,j);
+                            matriz[i][j] = grafo->dijkstra(i,j).first;
                         } else {
                             matriz[i][j] = 0;
                         }
