@@ -1,3 +1,4 @@
+#define infinito 99999//65535
 #include "include/Graph.hpp"
 #include <iostream>
 #include <string>
@@ -18,7 +19,7 @@ int menu() {
         cout << "[4] Caminho minimo entre dois vertices - Floyd" << endl;
         cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl; // feito (conferir erros)
         cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl; // feito (conferir erros)
-        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // implementar arvore -> recursividade
+        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // ok
         cout << "[8] Raio, centro, diametro e periferia do grafo" << endl; 
         cout << "[9] Conjunto de vertices de articulacao" << endl;
         cout << "[0] Sair" << endl;
@@ -50,6 +51,8 @@ int main(int argc, char* argv[]){
 
     string nomeArquivoSaida = argv[2];
     ofstream arquivo_saida(nomeArquivoSaida, ios::app);
+    // abrir assim faz com que o conteudo do arquivo nao seja sobrescrito
+    
 
     // pega as outras informações e transforma em booleanos
     bool direcionado = false;
@@ -113,7 +116,7 @@ int main(int argc, char* argv[]){
                 resposta= grafo->dijkstra(origem,destino);
                 if(resposta.first==0){
                     cout<<"Um dos vertices digitados nao existe.";
-                } else if (resposta.first==999999999){
+                } else if (resposta==infinito){
                     cout<<"Nao foi encontrado caminho";
                 } else if(resposta.first>0){
                     cout<<"dijkstra:"<<resposta.second<<endl;
@@ -257,6 +260,34 @@ int main(int argc, char* argv[]){
             }
             case 8:
             {
+                size_t** matriz = new size_t*[grafo->getNumberOfNodes()];
+
+                for (size_t i = 1; i <= grafo->getNumberOfNodes(); i++){
+                    matriz[i] = new size_t[grafo->getNumberOfNodes()];
+                }
+                for (size_t i = 1; i <= grafo->getNumberOfNodes(); i++){
+                    for(size_t j = 1; j <= grafo->getNumberOfNodes(); j++){
+                        if(i != j){
+                            matriz[i][j] = grafo->dijkstra(i,j);
+                        } else {
+                            matriz[i][j] = 0;
+                        }
+                        
+                    }
+                }
+                vector<size_t> raio_diametro = grafo->raio_e_diametro(matriz);
+                vector<vector<size_t>> centro_periferia = grafo->determinar_centro_e_periferia(matriz, raio_diametro[0], raio_diametro[1]);
+                
+                delete[] matriz;
+                cout << "Raio = " << raio_diametro[0] << "\nDiâmetro = " << raio_diametro[1] << endl;
+                cout << "A periferia é composta pelos vértices: ";
+                for(size_t i = 0; i < centro_periferia[0].size(); i++){ // mostra a periferia
+                    cout << centro_periferia[0][i] << " ";
+                }
+                cout << "\nO centro é composto pelos vértices: ";
+                for(size_t i = 0; i < centro_periferia[0].size(); i++){ // mostra o centro
+                    cout << centro_periferia[1][i] << " ";
+                }
                 break;
             }
             case 9:

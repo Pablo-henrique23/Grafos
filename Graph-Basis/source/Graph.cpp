@@ -11,29 +11,30 @@
 #include <queue>
 
 using namespace std;
-Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes)
-{
+Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes){
     // Pega a primeira linha e joga pra tamanhoInstância (a 1° linha é o tamanho da instancia do grafo, check README.txt)
     string temp; // temporario pra ser usado na função getline()
     getline(instance, temp);
     // pega o tamanho da instancia em inteiro
     this->_number_of_nodes = stoi(temp); // stoi = string to int
     
+    // NOTA: Está comentado porque o pablo (henrique) ta com preguiça de refazer a matriz depois de reformular a leitura de txt.
+    // considerando que eu nao usei isso em lugar nenhum, resolvi manter comentado pra caso precise dps
     // cria e inicializa matriz de adjacencia 
-    this->matriz_adj = new size_t*[this->_number_of_nodes];
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
-        this->matriz_adj[i] = new size_t[this->_number_of_nodes];
-    }
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
-        for(size_t j = 1; j < this->_number_of_nodes; j++){
-            if(i != j){
-                this->matriz_adj[i][j] = infinito;
-            } else {
-                this->matriz_adj[i][j] = 0;
-            }
-            
-        }
-    }
+            // this->matriz_adj = new size_t*[this->_number_of_nodes+1];
+            // for (size_t i = 1; i < this->_number_of_nodes+1; i++){
+            //     this->matriz_adj[i] = new size_t[this->_number_of_nodes+1];
+            // }
+            // for (size_t i = 1; i < this->_number_of_nodes+1; i++){
+            //     for(size_t j = 1; j < this->_number_of_nodes+1; j++){
+            //         if(i != j){
+            //             this->matriz_adj[i][j] = infinito;
+            //         } else {
+            //             this->matriz_adj[i][j] = 0;
+            //         }
+                    
+            //     }
+            // }
     // -----------
 
     // adiciona outros parametros
@@ -50,28 +51,48 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     Edge aresta;
     this->_number_of_edges = 0;
     this->_number_of_nodes = 0;
-
-    while (getline(instance, linha)){    
-        // Deus nos ajude com stringstream
+    // Deus nos ajude com stringstream
+    while (getline(instance, linha)){ // le cada linha
         stringstream ss(linha);
-        ss >> no._id;
-        aresta._source_id = no._id;
-        ss >> proximoNo._id;
-        aresta._target_id = proximoNo._id;
-        ss >> aresta._weight;
-        add_node(no._id);
-        add_node(proximoNo._id);
-        add_edge(no._id, proximoNo._id, aresta._weight);
-
-        //this->matriz_adj[no._id][proximoNo._id] = aresta._weight;//REMOVIDO POIS JÁ EXISTE LISTA DE ADJACENCIA
-        if (direcionado == false){ // Se nao for direcionado, entao é uma via de mão dupla e precisa ter as duas arestas
-            cout << aresta._weight << endl;
-          //this->matriz_adj[proximoNo._id][no._id] = aresta._weight; REMOVIDO POIS JÁ EXISTE LISTA DE ADJACENCIA
-            add_edge(proximoNo._id, no._id, aresta._weight); // DANDO SEG FAULT
-
+        int contador = 0;
+        for (char i : linha){ // para cada caractere na linha (\n nao é armazenado)
+            if (i == ' '){
+                continue;
+            } // ignora espaços
+            if (contador == 0){ // le o id do no de onde a aresta sai
+                ss >> no._id;
+                // cout << i << " ";
+                add_node(no._id);
+                contador++;
+                
+            } else if (contador == 1){ // le o id do no pra onde a aresta vai
+                ss >> proximoNo._id;
+                // cout << i << " ";
+                add_node(proximoNo._id);
+                contador++;
+                
+            }
+            
+            if (contador == 2){ // se for 2, ta lendo aresta. sempre vai chegar no 2, ja que o contador é aumentado dentro dos if
+                if (!weighted_edges){
+                    aresta._weight = 1;
+                } else {
+                    ss >> aresta._weight;
+                    if(aresta._weight == 0){
+                        aresta._weight = 1;
+                    }
+                }
+                // cout << aresta._weight << endl;
+                add_edge(no._id, proximoNo._id, aresta._weight);
+                if (!direcionado){
+                    add_edge(proximoNo._id, no._id, aresta._weight);
+                }
+                contador++;
+            }
+            
+            
         }
     }
-    // fazer matriz de incidencia aqui para facilitar possiveis contas
     // print_graph();
 }
 
@@ -285,7 +306,7 @@ pair<size_t,string> Graph::dijkstra(size_t origem, size_t destino){
     
     for(size_t i = 0; i < this->_number_of_nodes; i++)
 		{
-			distancias[i] = 999999999;
+			distancias[i] = infinito;
 			visitados[i] = false;//mudar para 0 ou 1
                 predecessor[i] = -1;  // -1 indica que o nó não tem predecessor
 		}
@@ -589,6 +610,53 @@ void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
     }
 }
 
+vector<size_t> Graph::raio_e_diametro(size_t** matriz){ // CONSERTAR! CONCEITO TA ERRADO
+    vector<size_t> retorno;
+    // vector<size_t> centro;
+    // vector<size_t> periferia;
+    size_t raio = infinito, diametro = 0;
+    
+    for(size_t i = 1 ; i <= this->_number_of_nodes; i++){
+        for(size_t j = 1; j <= this->_number_of_nodes; j++){
+            if(matriz[i][j] == infinito){
+                continue;
+            }
+            if(i != j){
+                if (matriz[i][j] > diametro){
+                    diametro = matriz[i][j];
+                }
+                if (matriz[i][j] < raio){
+                    raio = matriz[i][j];
+                }
+            }
+        }
+    }
+    
+    retorno.push_back(raio);
+    retorno.push_back(diametro);
+    return retorno;
+    
+}
+
+vector<vector<size_t>> Graph::determinar_centro_e_periferia(size_t** matriz, size_t raio, size_t diametro){
+    vector<vector<size_t>> retorno;
+    vector<size_t> periferia; // == diametro
+    vector<size_t> centro; // == raio
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
+        for(size_t j = 1; j <= this->_number_of_nodes; j++){
+            if(matriz[i][j] == diametro){
+                periferia.push_back(i);
+            }
+            if(matriz[i][j] == raio){
+                centro.push_back(i);
+            }
+        }
+    }
+    retorno.push_back(centro);
+    retorno.push_back(periferia);
+    return retorno;
+}
+
 void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj do grafo e salva ele no arquivo de saida (txt) fornecido
     for(Node* no = this->_first; no != nullptr; no = no->_next_node){
         if(no->_next_node != nullptr){
@@ -612,13 +680,13 @@ void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj 
 }
 
 void Graph::printa_matriz_adj(){
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
         cout << "\t" << i;
     }
     cout << endl;
-    for (size_t i = 1; i < this->_number_of_nodes; i++){
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
         cout << "\n" << i;
-        for (size_t j = 1; j < this->_number_of_nodes; j++){
+        for (size_t j = 1; j <= this->_number_of_nodes; j++){
             cout << "\t" << this->matriz_adj[i][j];
         }
     }
