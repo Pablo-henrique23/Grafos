@@ -4,6 +4,7 @@
 #include "Node.hpp"
 #include "defines.hpp"
 #include <vector>
+#include <unordered_map>
 
 using namespace std;
 class Graph
@@ -31,8 +32,12 @@ public:
     vector<size_t> arvore_caminho_profundidade(size_t noInicial);
     void caminho_profundidade(vector<size_t> &retorno, size_t noInicial);
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
-    vector<size_t> raio_e_diametro(size_t** matriz);
-    vector<vector<size_t>> determinar_centro_e_periferia(size_t** matriz, size_t raio, size_t diametro);
+    void determinar_excentricidades();
+    void determinar_raio();
+    void determinar_diametro();
+    void determinar_centro();
+    void determinar_periferia();
+
 
     Node* gerarArvoreIsolada(Node* no); // fazer ainda (se precisar) -> ajuda pra recursividade
     Node* search_for_node(size_t node_id);
@@ -42,6 +47,11 @@ public:
     bool aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta);
  
 
+    unordered_map<size_t, size_t> getExcentricidades();
+    size_t get_raio();
+    size_t get_diametro();
+    vector<size_t> getCentro();
+    vector<size_t> getPeriferia();
     bool getDirected();
     size_t getNumberOfNodes();
     bool getWeighted_edges();
@@ -62,6 +72,11 @@ private:
     Node  *_last;
     size_t** matriz_adj;
     vector<vector<pair<int, int>>> adj;
+    unordered_map<size_t, size_t> excentricidades;
+    size_t diametro;
+    size_t raio;
+    vector<size_t> centro;
+    vector<size_t> periferia;
 };
 
 #endif  //GRAPH_HPP

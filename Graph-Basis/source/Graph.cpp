@@ -61,13 +61,11 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
             } // ignora espaços
             if (contador == 0){ // le o id do no de onde a aresta sai
                 ss >> no._id;
-                // cout << i << " ";
                 add_node(no._id);
                 contador++;
                 
             } else if (contador == 1){ // le o id do no pra onde a aresta vai
                 ss >> proximoNo._id;
-                // cout << i << " ";
                 add_node(proximoNo._id);
                 contador++;
                 
@@ -82,17 +80,16 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
                         aresta._weight = 1;
                     }
                 }
-                // cout << aresta._weight << endl;
                 add_edge(no._id, proximoNo._id, aresta._weight);
                 if (!direcionado){
                     add_edge(proximoNo._id, no._id, aresta._weight);
                 }
                 contador++;
             }
-            
-            
         }
     }
+    this->raio = infinito;
+    this->diametro = 0;
     // print_graph();
 }
 
@@ -300,11 +297,11 @@ pair<size_t,string> Graph::dijkstra(size_t origem, size_t destino){
     int predecessor[this->_number_of_nodes];
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> fila;
     
-    for(size_t i = 0; i < this->_number_of_nodes; i++)
+    for(size_t i = 1; i <= this->_number_of_nodes; i++)
 		{
 			distancias[i] = infinito;
-			visitados[i] = false;//mudar para 0 ou 1
-                predecessor[i] = -1;  // -1 indica que o nó não tem predecessor
+			visitados[i] = false; //mudar para 0 ou 1
+            predecessor[i] = -1;  // -1 indica que o nó não tem predecessor
 		}
     distancias[origem] = 0;
     fila.push(make_pair(distancias[origem], origem));
@@ -314,28 +311,24 @@ pair<size_t,string> Graph::dijkstra(size_t origem, size_t destino){
 		int vertice = p.second;
 		fila.pop(); 
 
-		if(visitados[vertice] == false)
-		{
-		visitados[vertice] = true;
+		if(visitados[vertice] == false){
+		    visitados[vertice] = true;
 	        for (size_t i = 0; i < adj[vertice].size(); i++) {
-            size_t v = adj[vertice][i].first;
-            size_t custo_da_aresta = adj[vertice][i].second;
-            if (distancias[v] > (distancias[vertice] + custo_da_aresta)) 
-            {
-            distancias[v] = distancias[vertice] + custo_da_aresta;
-            predecessor[v] = vertice;  // Atualiza o predecessor
-            fila.push(make_pair(distancias[v], v));
-            }
+                size_t v = adj[vertice][i].first;
+                size_t custo_da_aresta = adj[vertice][i].second;
+                if (distancias[v] > (distancias[vertice] + custo_da_aresta)) {
+                    distancias[v] = distancias[vertice] + custo_da_aresta;
+                    predecessor[v] = vertice;  // Atualiza o predecessor
+                    fila.push(make_pair(distancias[v], v));
+                }
             }
 		}
 	}
     string caminho;
-for (int at = destino; at != -1; at = predecessor[at]) {
-    caminho=to_string(at)+ (caminho.empty() ? "" : " -> ")+caminho;
-}
-
-
-		return {distancias[destino],caminho};
+    for (int at = destino; at != -1; at = predecessor[at]) {
+        caminho=to_string(at)+ (caminho.empty() ? "" : " -> ")+caminho;
+    }
+    return {distancias[destino],caminho};
 	
 }
 void Graph::print_graph(std::ofstream& output_file)
@@ -606,51 +599,72 @@ void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
     }
 }
 
-vector<size_t> Graph::raio_e_diametro(size_t** matriz){ // CONSERTAR! CONCEITO TA ERRADO
-    vector<size_t> retorno;
-    // vector<size_t> centro;
-    // vector<size_t> periferia;
-    size_t raio = infinito, diametro = 0;
-    
-    for(size_t i = 1 ; i <= this->_number_of_nodes; i++){
+void Graph::determinar_excentricidades(){
+    for(size_t i = 1; i <= this->_number_of_nodes; i++){
+        size_t exc = 0;
         for(size_t j = 1; j <= this->_number_of_nodes; j++){
-            if(matriz[i][j] == infinito){
-                continue;
-            }
-            if(i != j){
-                if (matriz[i][j] > diametro){
-                    diametro = matriz[i][j];
-                }
-                if (matriz[i][j] < raio){
-                    raio = matriz[i][j];
+            if(i != j){ // nao analisa iguais
+                pair<size_t, string> dijkstra = this->dijkstra(i,j);
+                if(dijkstra.first != infinito){
+                    if (dijkstra.first > exc){
+                        exc = dijkstra.first;
+                    }
                 }
             }
         }
+        this->excentricidades[i] = exc;
     }
-    
-    retorno.push_back(raio);
-    retorno.push_back(diametro);
-    return retorno;
-    
+}
+unordered_map<size_t, size_t> Graph::getExcentricidades(){
+    return this->excentricidades;
 }
 
-vector<vector<size_t>> Graph::determinar_centro_e_periferia(size_t** matriz, size_t raio, size_t diametro){
-    vector<vector<size_t>> retorno;
-    vector<size_t> periferia; // == diametro
-    vector<size_t> centro; // == raio
-    for (size_t i = 1; i <= this->_number_of_nodes; i++){
-        for(size_t j = 1; j <= this->_number_of_nodes; j++){
-            if(matriz[i][j] == diametro){
-                periferia.push_back(i);
-            }
-            if(matriz[i][j] == raio){
-                centro.push_back(i);
+void Graph::determinar_raio(){ 
+    for(auto& par : this->excentricidades){
+        if(par.second != 0 && par.second < this->raio){
+            this->raio = par.second;
+        }
+    }
+}
+size_t Graph::get_raio(){
+    return this->raio;
+}
+
+void Graph::determinar_diametro(){ 
+    for(auto& par : this->excentricidades){
+        if(par.second != infinito){
+            if(par.second > this->diametro){
+                this->diametro = par.second;
             }
         }
     }
-    retorno.push_back(centro);
-    retorno.push_back(periferia);
-    return retorno;
+}
+size_t Graph::get_diametro(){
+    return this->diametro;
+}
+
+void Graph::determinar_centro(){
+    // == raio
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
+        if(this->excentricidades[i] == this->raio){
+            this->centro.push_back(i);
+        }
+    }
+}
+vector<size_t> Graph::getCentro(){
+    return this->centro;
+}
+
+void Graph::determinar_periferia(){
+    // == diametro
+    for (size_t i = 1; i <= this->_number_of_nodes; i++){
+        if(this->excentricidades[i] == this->diametro){
+            this->periferia.push_back(i);
+        }
+    }
+}
+vector<size_t> Graph::getPeriferia(){
+    return this->periferia;
 }
 
 void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj do grafo e salva ele no arquivo de saida (txt) fornecido

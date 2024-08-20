@@ -13,14 +13,14 @@ int menu() {
         again = false;
         cout << endl;
         cout << "   ------  MENU ------" << endl;
-        cout << "[1] Fecho transitivo direto de um vertice" << endl; // ok
+        cout << "[1] Fecho transitivo direto de um vertice" << endl; // ok -> falta salvar
         cout << "[2] Fecho transitivo indireto de um vertice" << endl;  
-        cout << "[3] Caminho minimo entre dois vertices - Dijkstra" << endl; // ok
+        cout << "[3] Caminho minimo entre dois vertices - Dijkstra" << endl; // completo
         cout << "[4] Caminho minimo entre dois vertices - Floyd" << endl;
-        cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl; // feito (conferir erros)
-        cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl; // feito (conferir erros)
-        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // ok
-        cout << "[8] Raio, centro, diametro e periferia do grafo" << endl; 
+        cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl; // feito (conferir erros) -> falta salvar
+        cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl; // feito (conferir erros) -> falta salvar
+        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // completo
+        cout << "[8] Raio, centro, diametro e periferia do grafo" << endl; // completo
         cout << "[9] Conjunto de vertices de articulacao" << endl;
         cout << "[0] Sair" << endl;
         cout << "Escolha: ";
@@ -108,19 +108,33 @@ int main(int argc, char* argv[]){
             {
                 size_t origem;
                 size_t destino;
-                cout<<"Digite a origem:";
+                cout<<"Digite o nó de origem: ";
                 cin>>origem;
-                cout<<"Digite o destino:";
+                cout<<"Digite o nó destino: ";
                 cin>>destino;
                 pair<size_t,string> resposta;
                 resposta= grafo->dijkstra(origem,destino);
                 if(resposta.first==0){
-                    cout<<"Um dos vertices digitados nao existe.";
+                    cout<<"\nUm dos vertices digitados nao existe.";
                 } else if (resposta.first==infinito){
-                    cout<<"Nao foi encontrado caminho";
+                    cout<<"\nNao foi encontrado caminho";
                 } else if(resposta.first>0){
-                    cout<<"dijkstra:"<<resposta.second<<endl;
-                    cout<<"custo:"<<resposta.first<<endl;
+                    cout<<"\nDijkstra: "<<resposta.second<<endl;
+                    cout<<"Custo: "<<resposta.first<<endl;
+                }
+                char salvar = 'w';
+                while (salvar != 's' && salvar != 'n'){
+                    cout << "\nSalvar resposta no arquivo de saída especificado? (s/n) ";
+                    cin >> salvar;
+                }
+                if (salvar == 's'){
+                    cout << "Saída salva.\n";
+                    arquivo_saida << "\n====== Caminho Mínimo (Algoritmo de Dijkstra) do nó " << origem << " até o nó " << destino << " ======\n";
+                    arquivo_saida << "Dijkstra: "<<resposta.second<<endl;
+                    arquivo_saida << "Custo: "<<resposta.first<<endl;
+                } else {
+                    cout <<"\nOk";
+                    break;
                 }
             break;
             }
@@ -260,33 +274,64 @@ int main(int argc, char* argv[]){
             }
             case 8:
             {
-                size_t** matriz = new size_t*[grafo->getNumberOfNodes()];
-
-                for (size_t i = 1; i <= grafo->getNumberOfNodes(); i++){
-                    matriz[i] = new size_t[grafo->getNumberOfNodes()];
-                }
-                for (size_t i = 1; i <= grafo->getNumberOfNodes(); i++){
-                    for(size_t j = 1; j <= grafo->getNumberOfNodes(); j++){
-                        if(i != j){
-                            matriz[i][j] = grafo->dijkstra(i,j).first;
-                        } else {
-                            matriz[i][j] = 0;
-                        }
-                        
+                grafo->determinar_excentricidades();
+                grafo->determinar_diametro();
+                grafo->determinar_raio();
+                size_t raio = grafo->get_raio();
+                size_t diametro = grafo->get_diametro();
+                grafo->determinar_centro();
+                vector<size_t> centro = grafo->getCentro();
+                grafo->determinar_periferia();
+                vector<size_t> periferia = grafo->getPeriferia();
+                
+                cout << "Raio = " << raio << "\nDiâmetro = " << diametro << endl;
+                cout << "ID dos nós periféricos: ";
+                for(size_t i : periferia){
+                    if(i != periferia.back()){
+                        cout << i << ", ";
+                    } else {
+                        cout << i;
                     }
                 }
-                vector<size_t> raio_diametro = grafo->raio_e_diametro(matriz);
-                vector<vector<size_t>> centro_periferia = grafo->determinar_centro_e_periferia(matriz, raio_diametro[0], raio_diametro[1]);
-                
-                delete[] matriz;
-                cout << "Raio = " << raio_diametro[0] << "\nDiâmetro = " << raio_diametro[1] << endl;
-                cout << "A periferia é composta pelos vértices: ";
-                for(size_t i = 0; i < centro_periferia[0].size(); i++){ // mostra a periferia
-                    cout << centro_periferia[0][i] << " ";
+
+                cout << "\nID dos nós centrais: ";
+                for(size_t i : centro){
+                    if(i != centro.back()){
+                        cout << i << ", ";
+                    } else {
+                        cout << i;
+                    }
                 }
-                cout << "\nO centro é composto pelos vértices: ";
-                for(size_t i = 0; i < centro_periferia[0].size(); i++){ // mostra o centro
-                    cout << centro_periferia[1][i] << " ";
+                char salvar = 'w';
+                while (salvar != 's' && salvar != 'n'){
+                    cout << "\n\nSalvar resposta no arquivo de saída especificado? (s/n) ";
+                    cin >> salvar;
+                }
+                if (salvar == 's'){
+                    cout << "Saída salva.\n";
+                    arquivo_saida << "\n====== Raio, centro, diâmetro e periferia do grafo" << " ======\n";
+                    arquivo_saida << "Raio = " << raio << "\nDiâmetro = " << diametro << endl;
+                    arquivo_saida << "ID dos nós periféricos: ";
+                    for(size_t i : periferia){
+                        if(i != periferia.back()){
+                            arquivo_saida << i << ", ";
+                        } else {
+                            arquivo_saida << i;
+                        }
+                    }
+
+                    arquivo_saida << "\nID dos nós centrais: ";
+                    for(size_t i : centro){
+                        if(i != centro.back()){
+                            arquivo_saida << i << ", ";
+                        } else {
+                            arquivo_saida << i << endl;
+                        }
+                    }
+
+                } else {
+                    cout <<"\nOk";
+                    break;
                 }
                 break;
             }
