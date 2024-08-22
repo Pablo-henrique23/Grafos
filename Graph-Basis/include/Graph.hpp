@@ -19,7 +19,7 @@ public:
     void remove_node(size_t node_id);
     void remove_edge(size_t node_id_1, size_t node_id_2);
     void add_node(size_t node_id, float weight = 0);
-    void add_edge(size_t node_id_1, size_t node_id_2, float weight = 0);
+    void add_edge(size_t node_id_1, size_t node_id_2, float weight = 0, bool gemea = false);
     void print_graph(std::ofstream& output_file);
     int conected(size_t node_id_1, size_t node_id_2);
     void print_graph();
@@ -27,7 +27,7 @@ public:
 
     pair<size_t,string> dijkstra(size_t orig, size_t dest);
     vector<size_t> fecho_tran_direto(size_t node_id);
-    vector<Edge*> agmKruskal(vector<Edge*> arestas);
+    vector<Edge*> agmKruskal(vector<Edge*> arestas, size_t n);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
     vector<size_t> arvore_caminho_profundidade(size_t noInicial);
     void caminho_profundidade(vector<size_t> &retorno, size_t noInicial);
@@ -48,6 +48,7 @@ public:
  
 
     unordered_map<size_t, size_t> getExcentricidades();
+    Node* getFirst();
     size_t get_raio();
     size_t get_diametro();
     vector<size_t> getCentro();

@@ -2,6 +2,7 @@
 #include "../include/Graph.hpp"
 #include "../include/Node.hpp"
 #include "../include/Edge.hpp"
+#include "../include/Conjunto.hpp"
 #include <iostream>
 #include <cstddef>
 #include <string>
@@ -80,9 +81,9 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
                         aresta._weight = 1;
                     }
                 }
-                add_edge(no._id, proximoNo._id, aresta._weight);
+                add_edge(no._id, proximoNo._id, aresta._weight, false);
                 if (!direcionado){
-                    add_edge(proximoNo._id, no._id, aresta._weight);
+                    add_edge(proximoNo._id, no._id, aresta._weight, true);
                 }
                 contador++;
             }
@@ -91,6 +92,9 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     this->raio = infinito;
     this->diametro = 0;
     // print_graph();
+    this->determinar_excentricidades();
+    this->determinar_diametro();
+    this->determinar_raio();
 }
 
 Graph::Graph()
@@ -226,8 +230,7 @@ void Graph::add_node(size_t node_id, float weight)
     }
 }
 
-void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight) // DANDO SEG FAULT
-{  
+void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool _gemea){  
     Node* No1;
     Node* traversal=this->_first;
      adj[node_id_1].push_back(make_pair(node_id_2, weight));
@@ -245,6 +248,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight) // DANDO 
         No1->_first_edge->_source_id = No1->_id; // check me pablo!
         No1->_first_edge->_weight = weight;
         No1->_first_edge->_target_id = node_id_2;
+        No1->_first_edge->_gemea = _gemea;
         No1->_number_of_edges++; // check me
         this->_number_of_edges++;
         //    cout<<"Criando primeira aresta do no"<<No1->_id<<endl;
@@ -259,6 +263,7 @@ void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight) // DANDO 
         edgeTraversal->_next_edge->_source_id = node_id_1;
         edgeTraversal->_next_edge->_weight = weight;
         edgeTraversal->_next_edge->_target_id = node_id_2;
+        edgeTraversal->_next_edge->_gemea = _gemea;
         this->_number_of_edges++;
         No1->_number_of_edges++; // check me
 
@@ -424,8 +429,8 @@ vector<size_t> Graph::fecho_tran_direto(size_t node_id){
 //     cout << busca->_id << endl;
 // }
 Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar retorna o endereço dele
-    Node* no = new Node();
-    no = this->_first;
+    Node* no = this->_first;
+
     while(no!=nullptr){     
         if (no->_id == node_id){
             return no;
@@ -503,7 +508,6 @@ vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
     }
     // cout << retorno.size() << endl;
     return retorno;
-
 }
 
 vector<Edge*> Graph::agmPrim(vector<Edge*> arestas, size_t nNos){
@@ -512,24 +516,34 @@ vector<Edge*> Graph::agmPrim(vector<Edge*> arestas, size_t nNos){
     sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
     int i = 0;
     size_t peso_total = 0;
-    while (retorno.size() != nNos - 1){
+    while (i < nNos - 1){
         for(Edge* aresta : arestas){
-            if (i == 0){
-                envolvidos.push_back(aresta->_source_id);
-                i++;
+            if(aresta->_gemea){ // todos os meus manos odeiam gemeas
+                continue;
             }
-            if(aresta->_source_id != aresta->_target_id){
+            if(aresta->_source_id != aresta->_target_id){ // ignora self-loop
+                if (i == 0){ // se for a primeira, tanto faz o resto
+                    envolvidos.push_back(aresta->_source_id);
+                    i++;
+                    cout << "Envolvidos = " << envolvidos.size() << " / " << nNos << " -- i = " << i << endl;
+                    continue;
+                }
+                if (!ta_no_vetor(envolvidos,aresta->_target_id) && !ta_no_vetor(envolvidos,aresta->_source_id)){
+                    continue;
+                }
                 if(ta_no_vetor(envolvidos, aresta->_source_id) && !ta_no_vetor(envolvidos, aresta->_target_id)){
                     envolvidos.push_back(aresta->_target_id);
                     retorno.push_back(aresta);
                     peso_total += aresta->_weight;
-                    continue;
+                    i++;
+                    cout << "Envolvidos = " << envolvidos.size() << " / " << nNos << " -- i = " << i << endl;
                 }
                 if(!ta_no_vetor(envolvidos, aresta->_source_id) && ta_no_vetor(envolvidos, aresta->_target_id)){
                     envolvidos.push_back(aresta->_source_id);
                     retorno.push_back(aresta);
                     peso_total += aresta->_weight;
-                    continue;
+                    i++;
+                    cout << "Envolvidos = " << envolvidos.size() << " / " << nNos << " -- i = " << i << endl;
                 }
             }
 	    }
@@ -546,25 +560,25 @@ vector<Edge*> Graph::agmPrim(vector<Edge*> arestas, size_t nNos){
 }
 
 
-vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
-
+vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas, size_t n){
     // bota em ordem por peso
     sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;}); 
     vector<Edge*> retorno; // arestas que serão retornadas
-    vector<size_t> envolvidos; // ids de nós envolvidos
     size_t peso_total = 0;
-    // para cada aresta
+    Conjunto conj(n);
+
     for(Edge* aresta : arestas){
-        // se a aresta nao ta no retorno e o source dela nao ta nos envolvidos
-        if(aresta->_source_id != aresta->_target_id){
-            if(!aresta_no_vetor(retorno, aresta) && (!ta_no_vetor(envolvidos, aresta->_source_id))){
-                retorno.push_back(aresta); // coloca a aresta no retorno
-                envolvidos.push_back(aresta->_source_id); // coloca a source nos envolvidos
-                peso_total += aresta->_weight; // atualiza o peso
-            }
+        if(aresta->_gemea){ // pula as gemeas, ninguem quer saber delas
+            continue;
+        }
+        if(conj.find(aresta->_source_id) != conj.find(aresta->_target_id)){
+            conj.unite(aresta->_source_id, aresta->_target_id);
+            retorno.push_back(aresta);
+            peso_total += aresta->_weight;
         }
     }
-    // mostra o retorno, pode tirar se quiser (ai tem que colocar pra mostrar na main)
+
+    // mostra o retorno, pode tirar se quiser 
     cout << endl;
 
     // coloca em ordem
@@ -665,6 +679,10 @@ void Graph::determinar_periferia(){
 }
 vector<size_t> Graph::getPeriferia(){
     return this->periferia;
+}
+
+Node* Graph::getFirst(){
+    return this->_first;
 }
 
 void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj do grafo e salva ele no arquivo de saida (txt) fornecido

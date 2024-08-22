@@ -25,12 +25,12 @@ int menu() {
         cout << "[0] Sair" << endl;
         cout << "Escolha: ";
         cin >> selecao;
+    }while(again);
         if(!cin){
             again = true;
             cin.clear();
             cin.ignore();
         }
-    }while(again);
         return selecao;
     }
 
@@ -72,7 +72,9 @@ int main(int argc, char* argv[]){
     if (pv == "1"){
         peso_vertices = true;
     }
+    
     Graph *grafo = new Graph(arquivo_entrada, direcionado, ponderado, peso_vertices);
+
     bool exit=false;
     while(!exit){
         int selecao = menu();
@@ -149,8 +151,9 @@ int main(int argc, char* argv[]){
                     break;
                 }
                 vector<size_t> vertices; // vai armazenar os IDs dos vertices pra fazer o subgrafo vertice induzido
+                vector<Edge*> arestas;
                 size_t v; // vai ser usado pra ler o ID do nó
-                cout << "Digite o indice de cada vértice para gerar o grafo vértice-induzido (0 para parar): ";
+                cout << "Digite o indice de cada vértice para gerar o grafo vértice-induzido (0 para parar e 65536 para todos): ";
        
                 while (true){ // enquanto 0 nao for digitado, continua lendo 
                     cin >> v; // le o id do nó
@@ -160,16 +163,29 @@ int main(int argc, char* argv[]){
                             cout << "Conjunto de vértices vazio. Saindo.\n";
                             break;
                         }
-                        vector<Edge*> arestas = grafo->gerarVerticeInduzido(vertices);
+                        if(vertices.size() == 1){
+                            cout << "Apenas um vértice detectado.\nCusto total = 0" << endl;
+                            break;
+                        }
+                        arestas = grafo->gerarVerticeInduzido(vertices);
                         if (arestas.empty()){
                             cout << "Não foi possível gerar subgrafo vertice induzido. Saindo.\n";
                             break;
                         }
                         
-                        grafo->agmPrim(arestas, (size_t)vertices.size());    
+                        grafo->agmPrim(arestas, vertices.size());    
                         break;
                         
                     } else {
+                        if (v == 65536){
+                            vertices.clear();
+                            for(Node* noI = grafo->getFirst(); noI!=nullptr; noI = noI->_next_node){
+                                vertices.push_back(noI->_id);
+                            }
+                            arestas = grafo->gerarVerticeInduzido(vertices);
+                            grafo->agmPrim(arestas, vertices.size());
+                            break;
+                        }
                         if(grafo->ta_no_vetor(vertices,v)){
                             cout << "Vértice repetido detectado, ignorando.\n" ;
                             continue;
@@ -182,18 +198,22 @@ int main(int argc, char* argv[]){
                         vertices.push_back(v);		
                     }
                 }
+                arestas.clear();
+                vertices.clear();
                 break;
             }
             // uma Árvore Geradora Mínima sobre o subgrafo vértice-induzido por X usando o algoritmo de Kruskal;
-            case 6:
+            case 6: // EVENTUALMENTE da seg fault, mas não consegui achar o motivo
             {
                 if(!grafo->getWeighted_edges()){
                     cout << "Grafo não ponderado. Saindo. \n";
                     break;
                 }
                 vector<size_t> vertices; // vai armazenar os IDs dos vertices pra fazer o subgrafo vertice induzido
+                vector<Edge*> arestas;
                 size_t v; // vai ser usado pra ler o ID do nó
-                cout << "Digite o indice de cada vértice para gerar o grafo vértice-induzido (0 para parar): ";
+                cout << "Digite o indice de cada vértice para gerar o grafo vértice-induzido (0 para parar e 65536 para todos): ";
+               
                 while (true){ // enquanto 0 nao for digitado, continua lendo 
                     cin >> v; // le o id do nó
 
@@ -203,17 +223,30 @@ int main(int argc, char* argv[]){
                             cout << "Nenhum vértice inserido, saindo.\n";
                             break;
                         }
+                        if(vertices.size() == 1){
+                            cout << "Apenas um vértice detectado.\nCusto total = 0" << endl;
+                            break;
+                        }
                         // validação
-                        vector<Edge*> arestas = grafo->gerarVerticeInduzido(vertices);
+                        arestas = grafo->gerarVerticeInduzido(vertices);
                         if (arestas.empty()){
                             cout << "Não foi possível gerar subgrafo vertice induzido. Saindo.\n";
                             break;
                         }
-                      
-                        grafo->agmKruskal(arestas);
+                        grafo->agmKruskal(arestas, vertices.size());
                     	break;    
                     } else { // nao inseriu 0
-                        if (grafo->ta_no_vetor(vertices, v)){ // autoexplicativo
+                        if (v == 65536){
+                            vertices.clear();
+                            for(Node* noI = grafo->getFirst(); noI!=nullptr; noI = noI->_next_node){
+                                vertices.push_back(noI->_id);
+                            }
+                            arestas = grafo->gerarVerticeInduzido(vertices);
+                            cout << "CHAMADA\n";
+                            grafo->agmKruskal(arestas, vertices.size());
+                            break;
+                        }
+                        if (grafo->ta_no_vetor(vertices, v)){ // repetido
                             cout << "Vertice repetido detectado, ignorando.\n";
                             continue; // pula a iteração
                         }
@@ -225,6 +258,8 @@ int main(int argc, char* argv[]){
                         vertices.push_back(v); // insere V no vetor que vai fazer o subgrafo vertice-induzido
                     }
                 }
+                arestas.clear();
+                vertices.clear();
                 break;
             }
             case 7: // caminhamento em profundidade a partir do vertice V
@@ -274,9 +309,6 @@ int main(int argc, char* argv[]){
             }
             case 8:
             {
-                grafo->determinar_excentricidades();
-                grafo->determinar_diametro();
-                grafo->determinar_raio();
                 size_t raio = grafo->get_raio();
                 size_t diametro = grafo->get_diametro();
                 grafo->determinar_centro();
@@ -354,6 +386,7 @@ int main(int argc, char* argv[]){
     }
     arquivo_entrada.close();
     arquivo_saida.close();
+    
     return 0;
 }
 
