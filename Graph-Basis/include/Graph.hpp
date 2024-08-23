@@ -25,6 +25,8 @@ public:
     void print_graph();
 
 
+    size_t floyd(size_t inicio, size_t destino);
+    void calcularFloydTodo();//size_t inicial, size_t destino);
     pair<size_t,string> dijkstra(size_t orig, size_t dest);
     vector<size_t> fecho_tran_direto(size_t node_id);
     vector<Edge*> agmKruskal(vector<Edge*> arestas, size_t n);
@@ -37,16 +39,16 @@ public:
     void determinar_diametro();
     void determinar_centro();
     void determinar_periferia();
+    void desvisitar_todos();
 
-
-    Node* gerarArvoreIsolada(Node* no); // fazer ainda (se precisar) -> ajuda pra recursividade
     Node* search_for_node(size_t node_id);
     bool taNoGrafo(size_t id);
     bool ta_no_vetor(vector<size_t>& vetor, size_t node_id);
     bool node_no_vetor(vector<Node*>& vetor, Node* node);
     bool aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta);
  
-
+    vector<Edge*> allEdges();
+    Edge* getAresta(size_t no1, size_t no2);
     unordered_map<size_t, size_t> getExcentricidades();
     Node* getFirst();
     size_t get_raio();
@@ -78,6 +80,7 @@ private:
     size_t raio;
     vector<size_t> centro;
     vector<size_t> periferia;
+    vector<vector<float>> matrizFloyd;
 };
 
 #endif  //GRAPH_HPP

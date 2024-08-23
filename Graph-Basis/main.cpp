@@ -42,6 +42,7 @@ int main(int argc, char* argv[]){
     }
     // Lê o arquivo.
     string nomeArquivoEntrada = argv[1];
+    cout << "Criando instancia do arquivo\n";
     ifstream arquivo_entrada(nomeArquivoEntrada);
     // Confere se o arquivo existe
     if (!arquivo_entrada){ 
@@ -140,8 +141,32 @@ int main(int argc, char* argv[]){
                 }
             break;
             }
-            case 4:
-            {
+            case 4: // floyd 
+            {   
+                size_t inicio, destino;
+                cout << "Digite o vértice inicial: ";
+                cin >> inicio;
+                cout << "Digite o vértice de destino: ";
+                cin >> destino;
+                if(!grafo->taNoGrafo(inicio) || !grafo->taNoGrafo(destino)){
+                    cout << "\nUm dos vértices não foi encontrado. Saindo.\n";
+                    break;
+                }
+                cout << endl;
+                size_t resultado = grafo->floyd(inicio, destino);
+                cout << endl;
+                char salvar = 'w';
+                while(salvar != 's' && salvar != 'n'){
+                    cout << "\nSalvar resultado? (s/n) ";
+                    cin >> salvar;
+                }
+                if(salvar == 's'){
+                    cout << "Resultado salvo.\n";
+                    arquivo_saida << "\n====== Caminho Mínimo (Floyd) de " << inicio << " até " << destino << " ======\n";
+                    arquivo_saida << "Custo = " << resultado << endl;
+                } else if (salvar == 'n'){
+                    cout << "Ok\n";
+                }
                 break;
             }
             case 5:
@@ -150,12 +175,18 @@ int main(int argc, char* argv[]){
                     cout << "Grafo não ponderado. Saindo. \n";
                     break;
                 }
+                if(grafo->getDirected()){
+                    cout << "Prim não se aplica a grafos direcionados. Saindo\n";
+                    break;
+                }
                 vector<size_t> vertices; // vai armazenar os IDs dos vertices pra fazer o subgrafo vertice induzido
                 vector<Edge*> arestas;
+                vector<Edge*> resultado;
                 size_t v; // vai ser usado pra ler o ID do nó
+                bool running = true;
                 cout << "Digite o indice de cada vértice para gerar o grafo vértice-induzido (0 para parar e 65536 para todos): ";
        
-                while (true){ // enquanto 0 nao for digitado, continua lendo 
+                while (running){ // enquanto 0 nao for digitado, continua lendo 
                     cin >> v; // le o id do nó
 		        
                     if (v == 0){ // fazer as validações, vai ficar quase igual ao 6
@@ -173,8 +204,8 @@ int main(int argc, char* argv[]){
                             break;
                         }
                         
-                        grafo->agmPrim(arestas, vertices.size());    
-                        break;
+                        resultado = grafo->agmPrim(arestas, vertices.size());    
+                        running = false;
                         
                     } else {
                         if (v == 65536){
@@ -183,20 +214,40 @@ int main(int argc, char* argv[]){
                                 vertices.push_back(noI->_id);
                             }
                             arestas = grafo->gerarVerticeInduzido(vertices);
-                            grafo->agmPrim(arestas, vertices.size());
-                            break;
-                        }
-                        if(grafo->ta_no_vetor(vertices,v)){
-                            cout << "Vértice repetido detectado, ignorando.\n" ;
-                            continue;
-                        }
-                        // se nao estiver no grafo e nem for 0, entao é realmente inválido (0 nunca vai ser encontrado, por isso a dupla condição)
-                        if (!grafo->taNoGrafo(v)){
-                            cout << "Nó inválido detectado, ignorando.\n";
-                            continue;
+                            resultado = grafo->agmPrim(arestas, vertices.size());
+                            running = false;
+                        } else {
+                            if(grafo->ta_no_vetor(vertices,v)){
+                                cout << "Vértice repetido detectado, ignorando.\n" ;
+                                continue;
+                            }
+                            // se nao estiver no grafo e nem for 0, entao é realmente inválido (0 nunca vai ser encontrado, por isso a dupla condição)
+                            if (!grafo->taNoGrafo(v)){
+                                cout << "Nó inválido detectado, ignorando.\n";
+                                continue;
+                            }
                         }
                         vertices.push_back(v);		
                     }
+                }
+                char salvar = 'w';
+                while (salvar != 's' && salvar != 'n'){
+                    cout << "\nDeseja salvar o resultado no arquivo? (s/n) ";
+                    cin >> salvar;
+                    cout << salvar << endl;
+                }
+                if(salvar == 's'){
+                    cout << "Salvando.\n";
+                    size_t peso_total = 0;
+                    arquivo_saida << "\n====== Árvore Geradora Mínima (Prim) ======\n";
+                    for(Edge* i : resultado){
+                        arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
+                        peso_total += i->_weight;
+                    }
+                    arquivo_saida << "\nCusto total: " << peso_total << endl;
+                } else if(salvar == 'n') {
+                    cout << "Ok\n";
+                    break;
                 }
                 arestas.clear();
                 vertices.clear();
@@ -209,12 +260,19 @@ int main(int argc, char* argv[]){
                     cout << "Grafo não ponderado. Saindo. \n";
                     break;
                 }
+                if(grafo->getDirected()){
+                    cout << "Kruskal não se aplica a grafos direcionados. Saindo\n";
+                    break;
+                }
                 vector<size_t> vertices; // vai armazenar os IDs dos vertices pra fazer o subgrafo vertice induzido
                 vector<Edge*> arestas;
+                vector<Edge*> resultado;
+                
                 size_t v; // vai ser usado pra ler o ID do nó
+                bool running = true;
                 cout << "Digite o indice de cada vértice para gerar o grafo vértice-induzido (0 para parar e 65536 para todos): ";
                
-                while (true){ // enquanto 0 nao for digitado, continua lendo 
+                while (running){ // enquanto 0 nao for digitado, continua lendo 
                     cin >> v; // le o id do nó
 
                     if (v == 0){
@@ -233,8 +291,8 @@ int main(int argc, char* argv[]){
                             cout << "Não foi possível gerar subgrafo vertice induzido. Saindo.\n";
                             break;
                         }
-                        grafo->agmKruskal(arestas, vertices.size());
-                    	break;    
+                        resultado = grafo->agmKruskal(arestas, vertices.size());
+                    	running = false;    
                     } else { // nao inseriu 0
                         if (v == 65536){
                             vertices.clear();
@@ -242,21 +300,39 @@ int main(int argc, char* argv[]){
                                 vertices.push_back(noI->_id);
                             }
                             arestas = grafo->gerarVerticeInduzido(vertices);
-                            cout << "CHAMADA\n";
-                            grafo->agmKruskal(arestas, vertices.size());
-                            break;
-                        }
-                        if (grafo->ta_no_vetor(vertices, v)){ // repetido
-                            cout << "Vertice repetido detectado, ignorando.\n";
-                            continue; // pula a iteração
-                        }
+                            resultado = grafo->agmKruskal(arestas, vertices.size());
+                            running = false;
+                        } else {
+                            if (grafo->ta_no_vetor(vertices, v)){ // repetido
+                                cout << "Vertice repetido detectado, ignorando.\n";
+                                continue; // pula a iteração
+                            }
 
-                        if (!grafo->taNoGrafo(v)){ // se nao estiver no grafo e nem for 0, entao é realmente inválido (0 nunca vai ser encontrado, por isso a dupla condição)
-                            cout << "Nó inválido detectado, ignorando.\n";
-                            continue;
+                            if (!grafo->taNoGrafo(v)){ // se nao estiver no grafo e nem for 0, entao é realmente inválido (0 nunca vai ser encontrado, por isso a dupla condição)
+                                cout << "Nó inválido detectado, ignorando.\n";
+                                continue;
+                            }
                         }
                         vertices.push_back(v); // insere V no vetor que vai fazer o subgrafo vertice-induzido
                     }
+                }
+                char salvar = 'w';
+                while (salvar != 's' && salvar != 'n'){
+                    cout << "\nDeseja salvar o resultado no arquivo? (s/n) ";
+                    cin >> salvar;
+                }
+                if(salvar == 's'){
+                    cout << "Salvando.\n";
+                    size_t peso_total = 0;
+                    arquivo_saida << "\n====== Árvore Geradora Mínima (Kruskal) ======\n";
+                    for(Edge* i : resultado){
+                        arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
+                        peso_total += i->_weight;
+                    }
+                    arquivo_saida << "\nCusto total: " << peso_total << endl;
+                } else if(salvar == 'n') {
+                    cout << "Ok\n";
+                    break;
                 }
                 arestas.clear();
                 vertices.clear();
@@ -309,6 +385,9 @@ int main(int argc, char* argv[]){
             }
             case 8:
             {
+                grafo->determinar_excentricidades();
+                grafo->determinar_diametro();
+                grafo->determinar_raio();
                 size_t raio = grafo->get_raio();
                 size_t diametro = grafo->get_diametro();
                 grafo->determinar_centro();
@@ -375,11 +454,6 @@ int main(int argc, char* argv[]){
             {
                 grafo->lista_adjacencia(arquivo_saida);
                 cout << "Salvando lista no arquivo de saída fornecido\n";
-                break;
-            }
-            case 100:
-            {
-                grafo->printa_matriz_adj();
                 break;
             }
         }

@@ -14,31 +14,12 @@
 using namespace std;
 Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes){
     // Pega a primeira linha e joga pra tamanhoInstância (a 1° linha é o tamanho da instancia do grafo, check README.txt)
+    cout << "Inicio do construtor\n";
     string temp; // temporario pra ser usado na função getline()
     getline(instance, temp);
     // pega o tamanho da instancia em inteiro
     this->_number_of_nodes = stoi(temp); // stoi = string to int
     
-    // NOTA: Está comentado porque o pablo (henrique) ta com preguiça de refazer a matriz depois de reformular a leitura de txt.
-    // considerando que eu nao usei isso em lugar nenhum, resolvi manter comentado pra caso precise dps
-    // cria e inicializa matriz de adjacencia 
-            // this->matriz_adj = new size_t*[this->_number_of_nodes+1];
-            // for (size_t i = 1; i < this->_number_of_nodes+1; i++){
-            //     this->matriz_adj[i] = new size_t[this->_number_of_nodes+1];
-            // }
-            // for (size_t i = 1; i < this->_number_of_nodes+1; i++){
-            //     for(size_t j = 1; j < this->_number_of_nodes+1; j++){
-            //         if(i != j){
-            //             this->matriz_adj[i][j] = infinito;
-            //         } else {
-            //             this->matriz_adj[i][j] = 0;
-            //         }
-                    
-            //     }
-            // }
-    // -----------
-
-    // adiciona outros parametros
     adj.resize(this->_number_of_nodes+1);
     this->_directed = direcionado;
     this->_weighted_edges = weighted_edges;
@@ -53,6 +34,7 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     this->_number_of_edges = 0;
     this->_number_of_nodes = 0;
     // Deus nos ajude com stringstream
+    cout << "Começando a ler arquivo.\n";
     while (getline(instance, linha)){ // le cada linha
         stringstream ss(linha);
         int contador = 0;
@@ -89,12 +71,11 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
             }
         }
     }
+    cout << "Terminou de ler \n";
     this->raio = infinito;
     this->diametro = 0;
     // print_graph();
-    this->determinar_excentricidades();
-    this->determinar_diametro();
-    this->determinar_raio();
+    
 }
 
 Graph::Graph()
@@ -233,7 +214,7 @@ void Graph::add_node(size_t node_id, float weight)
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool _gemea){  
     Node* No1;
     Node* traversal=this->_first;
-     adj[node_id_1].push_back(make_pair(node_id_2, weight));
+    adj[node_id_1].push_back(make_pair(node_id_2, weight));
     while(traversal!=nullptr){
         if(node_id_1==traversal->_id){
             No1 = traversal;
@@ -302,7 +283,7 @@ pair<size_t,string> Graph::dijkstra(size_t origem, size_t destino){
     int predecessor[this->_number_of_nodes];
     priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> fila;
     
-    for(size_t i = 1; i <= this->_number_of_nodes; i++)
+    for(size_t i = 0; i <= this->_number_of_nodes; i++)
 		{
 			distancias[i] = infinito;
 			visitados[i] = false; //mudar para 0 ou 1
@@ -511,51 +492,69 @@ vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
 }
 
 vector<Edge*> Graph::agmPrim(vector<Edge*> arestas, size_t nNos){
+// LEMBRETE: a intenção era fazer um array com as arestas disponíveis (arestas disponíveis = arestas ligadas aos vertices
+// que ja foram inseridos) e iterar sobre ela pra achar a proxima a ser adicionada
     vector<Edge*> retorno;
-    vector<size_t> envolvidos;
-    sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
-    int i = 0;
+    vector<Node*> nos_disponiveis;
+    vector<Edge*> arestas_disponiveis;
     size_t peso_total = 0;
-    while (i < nNos - 1){
-        for(Edge* aresta : arestas){
-            if(aresta->_gemea){ // todos os meus manos odeiam gemeas
-                continue;
-            }
-            if(aresta->_source_id != aresta->_target_id){ // ignora self-loop
-                if (i == 0){ // se for a primeira, tanto faz o resto
-                    envolvidos.push_back(aresta->_source_id);
-                    i++;
-                    cout << "Envolvidos = " << envolvidos.size() << " / " << nNos << " -- i = " << i << endl;
-                    continue;
-                }
-                if (!ta_no_vetor(envolvidos,aresta->_target_id) && !ta_no_vetor(envolvidos,aresta->_source_id)){
-                    continue;
-                }
-                if(ta_no_vetor(envolvidos, aresta->_source_id) && !ta_no_vetor(envolvidos, aresta->_target_id)){
-                    envolvidos.push_back(aresta->_target_id);
+    this->desvisitar_todos();
+    sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
+    retorno.push_back(arestas[0]); // pega a de menor peso
+
+    Node* noinicial = search_for_node(arestas[0]->_source_id);
+    Node* targetInicial = search_for_node(arestas[0]->_target_id);
+    nos_disponiveis.push_back(noinicial);
+    nos_disponiveis.push_back(targetInicial);
+    noinicial->_visitado = true; // visita
+    targetInicial->_visitado = true;
+    peso_total += arestas[0]->_weight;
+
+    for(Edge* aresta = noinicial->_first_edge; aresta != nullptr; aresta = aresta->_next_edge){
+        arestas_disponiveis.push_back(aresta);
+    } // coloca as arestas nos disponiveis
+    
+    sort(arestas_disponiveis.begin(), arestas_disponiveis.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
+
+    while(retorno.size() < nNos -1){
+        for(Edge* aresta : arestas_disponiveis){
+            if(!aresta_no_vetor(retorno, aresta)){
+                Node* fonte = search_for_node(aresta->_source_id);
+                Node* target = search_for_node(aresta->_target_id);
+                if(fonte->_visitado && !target->_visitado){
+                    target->_visitado = true;
+                    nos_disponiveis.push_back(target);
                     retorno.push_back(aresta);
                     peso_total += aresta->_weight;
-                    i++;
-                    cout << "Envolvidos = " << envolvidos.size() << " / " << nNos << " -- i = " << i << endl;
                 }
-                if(!ta_no_vetor(envolvidos, aresta->_source_id) && ta_no_vetor(envolvidos, aresta->_target_id)){
-                    envolvidos.push_back(aresta->_source_id);
+                if(!fonte->_visitado && target->_visitado){
+                    fonte->_visitado = true;
+                    nos_disponiveis.push_back(fonte);
                     retorno.push_back(aresta);
                     peso_total += aresta->_weight;
-                    i++;
-                    cout << "Envolvidos = " << envolvidos.size() << " / " << nNos << " -- i = " << i << endl;
                 }
             }
-	    }
+        }
+        arestas_disponiveis.clear(); // refaz as arestas disponíveis
+        for(Node* no : nos_disponiveis){
+            for(Edge* a = no->_first_edge; a != nullptr; a = a->_next_edge){
+                arestas_disponiveis.push_back(a);
+            }
+        }
+        sort(arestas_disponiveis.begin(), arestas_disponiveis.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
     }
+
+
+
     cout << endl;
-    sort(retorno.begin(), retorno.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_source_id < aresta2->_source_id;});
+    // sort(retorno.begin(), retorno.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_source_id < aresta2->_source_id;});
     cout << "Árvore Geradora Mínima composta pelas arestas\n";
     for(Edge* i : retorno){
         cout << "(" << i->_source_id << ", " << i->_target_id << ") ";
     }
     cout << endl;
     cout << "Custo total: " << peso_total << endl;
+    this->desvisitar_todos();
     return retorno;
 }
 
@@ -593,10 +592,8 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas, size_t n){
 
 vector<size_t> Graph::arvore_caminho_profundidade(size_t noInicial){
     // inicializa tudo em falso por garantia --> se so o construtor fizer isso, a segunda vez que for usar o [7] vai dar errado
-    for(Node* no = this->_first; no!=nullptr; no = no->_next_node){
-        no->_visitado = false;
-    }
     vector<size_t> retorno;
+    this->desvisitar_todos();
     this->caminho_profundidade(retorno, noInicial);
     return retorno;
 }
@@ -614,11 +611,14 @@ void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
 }
 
 void Graph::determinar_excentricidades(){
-    for(size_t i = 1; i <= this->_number_of_nodes; i++){
+    cout << "Numero de nós: " << _number_of_nodes << endl;
+    for(size_t i = 1; i < this->_number_of_nodes; i++){
+        cout << "Primeiro laço == " << i << endl;
         size_t exc = 0;
-        for(size_t j = 1; j <= this->_number_of_nodes; j++){
+        for(size_t j = 1; j < this->_number_of_nodes; j++){
             if(i != j){ // nao analisa iguais
                 pair<size_t, string> dijkstra = this->dijkstra(i,j);
+                cout << "chamando dijkstra " << i << " - " << j << endl;
                 if(dijkstra.first != infinito){
                     if (dijkstra.first > exc){
                         exc = dijkstra.first;
@@ -686,7 +686,10 @@ Node* Graph::getFirst(){
 }
 
 void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj do grafo e salva ele no arquivo de saida (txt) fornecido
+    arquivo_saida << "\n====== Lista de Adjacência ======\n";
+    cout << endl;
     for(Node* no = this->_first; no != nullptr; no = no->_next_node){
+        cout << no->_id << endl;
         if(no->_next_node != nullptr){
             cout << no->_id << " -> ";
             arquivo_saida << no->_id << " -> ";
@@ -718,4 +721,106 @@ void Graph::printa_matriz_adj(){
             cout << "\t" << this->matriz_adj[i][j];
         }
     }
+}
+
+void Graph::desvisitar_todos(){
+    for(Node* no = this->_first; no!=nullptr; no = no->_next_node){
+        no->_visitado = false;
+    }
+}
+
+void Graph::calcularFloydTodo(){//size_t inicial, size_t destino){
+    size_t n = this->_number_of_nodes;
+    // vector<Edge*> passou_por_onde;
+    vector<vector<float>> matrizFloyd(n+1, vector<float>(n+1, infinito)); // cria matriz de tamanho n+1 e infinito em todo mundo
+    for (size_t i = 1; i <= n; i++) {
+        matrizFloyd[i][i] = 0;
+    }
+    // reiniciar distancias
+    for (Node* node = this->_first; node != nullptr; node = node->_next_node) {
+        size_t i = node->_id;
+        Edge* edge = node->_first_edge;
+        while (edge) {
+            size_t j = edge->_target_id;
+            matrizFloyd[i][j] = edge->_weight;
+            if (edge->_gemea) {
+                // nao direcionado
+                matrizFloyd[j][i] = edge->_weight;
+            }
+            edge = edge->_next_edge;
+        }
+    }
+    // vector<Edge*> allArestas = this->allEdges();
+    this->matrizFloyd = matrizFloyd; // facilidade de acesso. provavelmente nao precisa 
+    // cout << "size = " << matrizFloyd.size();
+    // size_t n = matrizFloyd.size();
+    for (size_t k = 1; k <= n; k++) {
+        for (size_t i = 1; i <= n; i++) {
+            for (size_t j = 1; j <= n; j++) {
+                if (this->matrizFloyd[i][k] < infinito && this->matrizFloyd[k][j] < infinito) {
+                    this->matrizFloyd[i][j] = min(this->matrizFloyd[i][j], this->matrizFloyd[i][k] + this->matrizFloyd[k][j]);
+                    // for (Edge* aresta : allArestas) {
+                    //     if(this->matrizFloyd[i][k] + this->matrizFloyd[k][j] < this->matrizFloyd[i][j]){
+                    //         if (aresta->_source_id == inicial && aresta->_target_id == k) {
+                    //             passou_por_onde.push_back(aresta);
+                    //             break;
+                    //         }
+                    //     } else {
+                    //         if (aresta->_source_id == inicial && aresta->_target_id == destino) {
+                    //             passou_por_onde.push_back(aresta);
+                    //             break;
+                    //         }
+                    //     }
+                    // }
+                }
+            }
+        }
+    }
+}
+
+size_t Graph::floyd(size_t inicio, size_t destino) {
+    this->calcularFloydTodo();
+    cout << "Custo mínimo de " << inicio << " até " << destino << " = " << this->matrizFloyd[inicio][destino];
+    // vector<Edge*> retorno;
+    // vector<size_t> vertices;
+    // size_t n = this->_number_of_nodes;
+    // exibição da matriz
+    // for (size_t i = 1; i <= n; i++) {
+    //     cout << i << "   ";
+    // }
+    // cout << endl;
+    // for (size_t i = 1; i <= n; i++) {
+    //     cout << i << "   ";
+    //     for (size_t j = 1; j <= n; j++) {
+    //         if (this->matrizFloyd[i][j] == infinito) {
+    //             cout << "INF   ";
+    //         } else {
+    //             cout << this->matrizFloyd[i][j] << "   ";
+    //         }
+    //     }
+    //     cout << endl;
+    // }
+    // return retorno;
+    return this->matrizFloyd[inicio][destino];
+}
+
+vector<Edge*> Graph::allEdges(){
+    vector<Edge*> retorno;
+    for(Node* no = this->_first; no!= nullptr; no = no->_next_node){
+        for(Edge* edge = no->_first_edge; edge!=nullptr; edge=edge->_next_edge){
+            retorno.push_back(edge);
+        }
+    }
+    return retorno;
+}
+
+Edge* Graph::getAresta(size_t no1, size_t no2){
+    Edge* aresta = this->_first->_first_edge;
+    while(aresta != nullptr){
+        if(aresta->_source_id == no1 && aresta->_target_id == no2){
+            return aresta;
+        }
+        aresta = aresta->_next_edge;
+    }
+    return nullptr;
 }
