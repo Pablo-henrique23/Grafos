@@ -349,58 +349,55 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 }
 
 
-vector<size_t> Graph::fecho_tran_direto(size_t node_id){
-    
+vector<size_t> Graph::fecho_tran_direto(size_t node_id) {
     vector<size_t> noContatos;
     vector<size_t> noProcurados;
     vector<size_t> final;
-    if(search_for_node(node_id)==nullptr){
-    cout<<"digite um No valido";
-    return final;
+
+    if (search_for_node(node_id) == nullptr) {
+        cout << "Digite um Nó válido";
+        return final;
     }
+
     noContatos.push_back(node_id);
-    size_t no_id_inicial=node_id;
+    size_t no_id_inicial = node_id;
     Node* no;
     Edge* aresta;
-    while(!noContatos.empty()){
-        bool taNoVetor = ta_no_vetor(noProcurados,node_id);     
-        if (taNoVetor){
+
+    while (!noContatos.empty()) {
+        bool taNoVetor = ta_no_vetor(noProcurados, node_id);     
+        if (taNoVetor) {
             noContatos.pop_back();
             continue;
         }           
         no = search_for_node(noContatos.back());
         aresta = no->_first_edge;
         node_id = no->_id;
-        if(no_id_inicial!=noContatos.back()){
 
-        final.push_back(noContatos.back());
+        if (no_id_inicial != noContatos.back()) {
+            final.push_back(noContatos.back());
         }
         noContatos.pop_back();
-        for (size_t i = 0; i < no->_number_of_edges; i++)
-        {  
+
+        for (size_t i = 0; i < no->_number_of_edges; i++) {  
             noContatos.push_back(aresta->_target_id);
-            aresta=aresta->_next_edge;
+            aresta = aresta->_next_edge;
         }
 
         noProcurados.push_back(noContatos.front());
     }
-    if(final.size()==0){
-        cout<<"No "<< no_id_inicial<<" nao possui contato com ninguem"<<endl;
-    }else{
 
-    
-    for (size_t i = 0; i < final.size(); i++)
-    {
-        cout<<"Nos em contato com o No "<<no_id_inicial<<":"<<final[i]<<endl;
+    if (final.size() == 0) {
+        cout << "Nó " << no_id_inicial << " não possui contato com ninguém" << endl;
+    } else {
+        for (size_t i = 0; i < final.size(); i++) {
+            cout << "Nós em contato com o Nó " << no_id_inicial << ": " << final[i] << endl;
+        }
     }
-    }
-    
-    // O processo para grafo direcionado e nao direcionado é diferente
-    
 
     return final;
 }
-
+// Pequenas mudanças para formatar melhor e tentar evitar erros, é preciso verificar
 
 // Sempre que usar isso, confira se o retorno foi nullptr! Se nao for e voce tentar usar algum atributo,
 // vai dar core dumped
@@ -409,6 +406,37 @@ vector<size_t> Graph::fecho_tran_direto(size_t node_id){
 // if(busca != nullptr){
 //     cout << busca->_id << endl;
 // }
+
+
+// Método para inverter as arestas do grafo
+Graph Graph::inverter_arestas() {
+    Graph grafo_invertido;
+    
+    Node* no = _first;
+    while (no != nullptr) {
+        Edge* aresta = no->_first_edge;
+        while (aresta != nullptr) {
+            grafo_invertido.add_edge(aresta->_target_id, aresta->_source_id);
+            aresta = aresta->_next_edge;
+        }
+        no = no->_next_node;
+    }
+    
+    return grafo_invertido;
+}
+
+// Método para obter o fecho transitivo indireto
+vector<size_t> Graph::fecho_tran_indireto(size_t node_id) {
+    // Inverter as arestas do grafo
+    Graph grafo_invertido = this->inverter_arestas();
+
+    // Calcular o fecho transitivo indireto usando o grafo invertido
+    return grafo_invertido.fecho_tran_direto(node_id);
+}
+
+/* Reutilizando a função do fecho transitivo direto, preciso apenas de inverter as arestas do grafo
+ para obter o fecho transitivo indireto */
+
 Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar retorna o endereço dele
     Node* no = this->_first;
 

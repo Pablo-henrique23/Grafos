@@ -81,6 +81,9 @@ private:
     vector<size_t> centro;
     vector<size_t> periferia;
     vector<vector<float>> matrizFloyd;
+    Graph inverter_arestas();  
+    vector<size_t> fecho_tran_indireto(size_t node_id);  
+    
 };
 
 #endif  //GRAPH_HPP
