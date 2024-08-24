@@ -229,6 +229,25 @@ int main(int argc, char* argv[])
             }
             case 8:
             {
+                vector<size_t> rcdp = grafo->calcRCDP();
+
+                // Os primeiros elementos do vetor são o raio e o diâmetro
+                cout << "Raio: " << rcdp[0] << endl;
+                cout << "Diâmetro: " << rcdp[1] << endl;
+
+                // O restante são os nós do centro e da periferia
+                cout << "Centro: ";
+                size_t centro_tamanho = grafo->calcularCentro(grafo->calcularDistancias(), rcdp[0]).size();
+                for (size_t i = 2; i < 2 + centro_tamanho; i++) {
+                    cout << rcdp[i] << " ";
+                }
+                cout << endl;
+
+                cout << "Periferia: ";
+                for (size_t i = 2 + centro_tamanho; i < rcdp.size(); i++) {
+                    cout << rcdp[i] << " ";
+                }
+                cout << endl;
                 break;
             }
             case 9:

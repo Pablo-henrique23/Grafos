@@ -248,45 +248,40 @@ void Graph::print_graph()
     cout<<"Numero de Arestas:" << this->_number_of_edges << endl;
 }
 
-size_t Graph::dijkstra(size_t origem, size_t destino){
-    if(search_for_node(origem)==nullptr||search_for_node(destino)==nullptr)
-    {
-        return 0;
-    }  
-    size_t distancias[this->_number_of_nodes];
-    size_t visitados[this->_number_of_nodes];
-    priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> fila;
-    
-    for(size_t i = 0; i < this->_number_of_nodes; i++)
-		{
-			distancias[i] = 999999999;
-			visitados[i] = false;//mudar para 0 ou 1
-		}
-    distancias[origem] = 0;
-    fila.push(make_pair(distancias[origem], origem));
-    while(!fila.empty())
-	{
-		pair<int, int> p = fila.top(); 
-		int vertice = p.second;
-		fila.pop(); 
+size_t Graph::dijkstra(size_t origem, size_t destino) {
+    if (search_for_node(origem) == nullptr || search_for_node(destino) == nullptr) {
+        return numeric_limits<int>::max(); // Retorna infinito se um dos nós não existir
+    }
 
-		if(visitados[vertice] == false)
-		{
-		visitados[vertice] = true;
-	        for (int i = 0; i < adj[vertice].size(); i++) {
-            size_t v = adj[vertice][i].first;
-            size_t custo_da_aresta = adj[vertice][i].second;
-            if (distancias[v] > (distancias[vertice] + custo_da_aresta)) 
-            {
-            distancias[v] = distancias[vertice] + custo_da_aresta;
-            fila.push(make_pair(distancias[v], v));
+    vector<int> distancias(this->_number_of_nodes, numeric_limits<int>::max());
+    vector<bool> visitados(this->_number_of_nodes, false);
+    priority_queue<pair<int, size_t>, vector<pair<int, size_t>>, greater<>> fila;
+
+    distancias[origem] = 0;
+    fila.push({0, origem});
+
+    while (!fila.empty()) {
+        size_t vertice = fila.top().second;
+        fila.pop();
+
+        if (visitados[vertice]) continue; // Se o nó já foi visitado, ignore
+
+        visitados[vertice] = true;
+
+        // Supondo que adj seja um vetor de vetores de pares representando arestas
+        for (const auto& aresta : adj[vertice]) {
+            size_t v = aresta.first;
+            int custo_da_aresta = aresta.second;
+            if (distancias[vertice] != numeric_limits<int>::max() && distancias[v] > distancias[vertice] + custo_da_aresta) {
+                distancias[v] = distancias[vertice] + custo_da_aresta;
+                fila.push({distancias[v], v});
             }
-            }
-		}
-	}
-		return distancias[destino];
-	
+        }
+    }
+
+    return distancias[destino];
 }
+
 void Graph::print_graph(std::ofstream& output_file)
 {
 }
@@ -451,17 +446,17 @@ vector<size_t> Graph::fecho_tran_indireto(size_t node_id)
 // if(busca != nullptr){
 //     cout << busca->_id << endl;
 // }
-Node* Graph::search_for_node(size_t node_id){ //busca um nó no grafo, se achar retorna o endereço dele
-    Node* no = new Node();
-    no = this->_first;
-    while(no!=nullptr){     
-        if (no->_id == node_id){
+Node* Graph::search_for_node(size_t node_id) {
+    Node* no = this->_first;
+    while (no != nullptr) {
+        if (no->_id == node_id) {
             return no;
         }
-        no = no->_next_node;   
+        no = no->_next_node;
     }
     return nullptr;
 }
+
 
 bool Graph::ta_no_vetor(vector<size_t>& vetor, size_t node_id){
     for (size_t i = 0; i < vetor.size(); i++){   
@@ -599,6 +594,135 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas){
     cout << endl;
     cout << "Custo total: " << peso_total << endl;
     return retorno;
+}
+
+vector<vector<int>> Graph::calcularDistancias() {
+    vector<vector<int>> distancias(_number_of_nodes, vector<int>(_number_of_nodes, numeric_limits<int>::max()));
+
+    // Executar o algoritmo de Dijkstra para cada nó como origem
+    for (size_t origem = 0; origem < _number_of_nodes; ++origem) {
+        // Inicializar distâncias para o nó atual
+        vector<int> dist(this->_number_of_nodes, numeric_limits<int>::max());
+        vector<bool> visitados(this->_number_of_nodes, false);
+        priority_queue<pair<int, size_t>, vector<pair<int, size_t>>, greater<>> fila;
+
+        dist[origem] = 0;
+        fila.push({0, origem});
+
+        while (!fila.empty()) {
+            size_t u = fila.top().second;
+            fila.pop();
+
+            if (visitados[u]) continue;
+            visitados[u] = true;
+
+            // Atualizar as distâncias dos vizinhos
+            for (Edge* edge = this->search_for_node(u)->_first_edge; edge != nullptr; edge = edge->_next_edge) {
+                size_t v = edge->_target_id;
+                int peso = edge->_weight;
+                if (dist[u] != numeric_limits<int>::max() && dist[v] > dist[u] + peso) {
+                    dist[v] = dist[u] + peso;
+                    fila.push({dist[v], v});
+                }
+            }
+        }
+
+        // Copiar as distâncias calculadas para a matriz de distâncias
+        for (size_t j = 0; j < _number_of_nodes; ++j) {
+            distancias[origem][j] = dist[j];
+        }
+    }
+
+    return distancias;
+}
+
+int Graph::calcularRaio() {
+    auto distancias = calcularDistancias();
+    int raio = INT_MAX;
+    for (int i = 0; i < _number_of_nodes; i++) {
+        int excentricidade = 0;
+        for (int j = 0; j < _number_of_nodes; j++) {
+            if (distancias[i][j] != INT_MAX) {
+                excentricidade = max(excentricidade, distancias[i][j]);
+            }
+        }
+        raio = min(raio, excentricidade);
+    }
+    return raio;
+}
+
+int Graph::calcularDiametro() {
+    auto distancias = calcularDistancias();
+    int diametro = 0;
+    for (const auto& linha : distancias) {
+        for (int dist : linha) {
+            if (dist != INT_MAX) {
+                diametro = max(diametro, dist);
+            }
+        }
+    }
+    return diametro;
+}
+
+vector<size_t> Graph::calcularCentro(const vector<vector<int>>& distancias, int raio) {
+    vector<size_t> centro;
+    
+    for (int i = 0; i < _number_of_nodes; i++) {
+        int excentricidade = 0;
+        for (int j = 0; j < _number_of_nodes; j++) {
+            if (distancias[i][j] != INT_MAX) {
+                excentricidade = max(excentricidade, distancias[i][j]);
+            }
+        }
+        if (excentricidade == raio) {
+            centro.push_back(i);
+        }
+    }
+    return centro;
+}
+
+vector<size_t> Graph::calcularPeriferia(const vector<vector<int>>& distancias, int diametro) {
+    vector<size_t> periferia;
+    
+    for (int i = 0; i < _number_of_nodes; i++) {
+        int excentricidade = 0;
+        for (int j = 0; j < _number_of_nodes; j++) {
+            if (distancias[i][j] != INT_MAX) {
+                excentricidade = max(excentricidade, distancias[i][j]);
+            }
+        }
+        if (excentricidade == diametro) {
+            periferia.push_back(i);
+        }
+    }
+    return periferia;
+}
+
+vector<size_t> Graph::calcRCDP() {
+    vector<size_t> result;
+
+    // Calcula as distâncias uma única vez
+    auto distancias = calcularDistancias();
+
+    // Calcula o raio e o diâmetro
+    int raio = calcularRaio();
+    int diametro = calcularDiametro();
+
+    // Calcula o centro e a periferia
+    vector<size_t> centro = calcularCentro(distancias, raio);
+    vector<size_t> periferia = calcularPeriferia(distancias, diametro);
+
+    // Adiciona o raio e o diâmetro ao vetor de resultado
+    result.push_back(raio);
+    result.push_back(diametro);
+
+    // Adiciona os índices dos nós do centro ao vetor de resultado
+    result.insert(result.end(), centro.begin(), centro.end());
+
+    // Adiciona os índices dos nós da periferia ao vetor de resultado
+    result.insert(result.end(), periferia.begin(), periferia.end());
+
+    return result;
 }
 
 

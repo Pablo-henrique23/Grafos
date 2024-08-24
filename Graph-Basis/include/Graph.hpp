@@ -32,6 +32,12 @@ public:
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
     vector<Edge*> agmKruskal(vector<Edge*> arestas);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
+    vector<size_t> calcRCDP();
+    vector<vector<int>> calcularDistancias();
+    int calcularRaio();
+    int calcularDiametro();
+    vector<size_t> calcularCentro(const vector<vector<int>>& distancias, int raio);
+    vector<size_t> calcularPeriferia(const vector<vector<int>>& distancias, int diametro);
 
     bool taNoGrafo(size_t id);
     bool ta_no_vetor(vector<size_t>& vetor, size_t node_id);
