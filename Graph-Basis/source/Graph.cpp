@@ -410,25 +410,43 @@ vector<size_t> Graph::fecho_tran_direto(size_t node_id) {
 
 // Método para inverter as arestas do grafo
 Graph Graph::inverter_arestas() {
-    Graph grafo_invertido;
-    
-    Node* no = _first;
+    // Inicializa o grafo invertido como uma cópia do grafo original
+    Graph grafo_invertido(*this);
+
+    // Itera sobre todos os nós do grafo para remover todas as arestas
+    Node* no = grafo_invertido._first;
     while (no != nullptr) {
         Edge* aresta = no->_first_edge;
         while (aresta != nullptr) {
+            // Armazena o próximo ponteiro antes de remover a aresta
+            Edge* proxima_aresta = aresta->_next_edge;
+            // Remove a aresta atual
+            grafo_invertido.remove_edge(no->_id, aresta->_target_id);
+            // Avança para a próxima aresta
+            aresta = proxima_aresta;
+        }
+        no = no->_next_node;
+    }
+
+    // Agora, adicione as arestas invertidas
+    no = _first;
+    while (no != nullptr) {
+        Edge* aresta = no->_first_edge;
+        while (aresta != nullptr) {
+            // Adiciona a aresta invertida
             grafo_invertido.add_edge(aresta->_target_id, aresta->_source_id);
             aresta = aresta->_next_edge;
         }
         no = no->_next_node;
     }
-    
+
     return grafo_invertido;
 }
 
 // Método para obter o fecho transitivo indireto
 vector<size_t> Graph::fecho_tran_indireto(size_t node_id) {
     // Inverter as arestas do grafo
-    Graph grafo_invertido = this->inverter_arestas();
+    Graph grafo_invertido(this->inverter_arestas());
 
     // Calcular o fecho transitivo indireto usando o grafo invertido
     return grafo_invertido.fecho_tran_direto(node_id);
