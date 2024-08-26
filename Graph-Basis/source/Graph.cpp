@@ -413,29 +413,22 @@ Graph Graph::inverter_arestas() {
     // Inicializa o grafo invertido como uma cópia do grafo original
     Graph grafo_invertido(*this);
 
-    // Itera sobre todos os nós do grafo para remover todas as arestas
-    Node* no = grafo_invertido._first;
+    // Itera sobre todos os nós do grafo original
+    Node* no = _first;
     while (no != nullptr) {
         Edge* aresta = no->_first_edge;
         while (aresta != nullptr) {
-            // Armazena o próximo ponteiro antes de remover a aresta
+            // Armazena o próximo ponteiro antes de modificar as arestas
             Edge* proxima_aresta = aresta->_next_edge;
-            // Remove a aresta atual
+
+            // Adiciona a aresta invertida no grafo invertido
+            grafo_invertido.add_edge(aresta->_target_id, no->_id);
+
+            // Remove a aresta original do grafo invertido
             grafo_invertido.remove_edge(no->_id, aresta->_target_id);
+
             // Avança para a próxima aresta
             aresta = proxima_aresta;
-        }
-        no = no->_next_node;
-    }
-
-    // Agora, adicione as arestas invertidas
-    no = _first;
-    while (no != nullptr) {
-        Edge* aresta = no->_first_edge;
-        while (aresta != nullptr) {
-            // Adiciona a aresta invertida
-            grafo_invertido.add_edge(aresta->_target_id, aresta->_source_id);
-            aresta = aresta->_next_edge;
         }
         no = no->_next_node;
     }
