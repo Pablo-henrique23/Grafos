@@ -14,7 +14,7 @@
 using namespace std;
 Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes){
     // Pega a primeira linha e joga pra tamanhoInstância (a 1° linha é o tamanho da instancia do grafo, check README.txt)
-    cout << "Inicio do construtor\n";
+    // cout << "Inicio do construtor\n";
     string temp; // temporario pra ser usado na função getline()
     getline(instance, temp);
     // pega o tamanho da instancia em inteiro
@@ -34,7 +34,7 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     this->_number_of_edges = 0;
     this->_number_of_nodes = 0;
     // Deus nos ajude com stringstream
-    cout << "Começando a ler arquivo.\n";
+    // cout << "Começando a ler arquivo.\n";
     while (getline(instance, linha)){ // le cada linha
         stringstream ss(linha);
         int contador = 0;
@@ -71,7 +71,7 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
             }
         }
     }
-    cout << "Terminou de ler \n";
+    // cout << "Terminou de ler \n";
     this->raio = infinito;
     this->diametro = 0;
     // print_graph();
@@ -350,57 +350,50 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 
 
 vector<size_t> Graph::fecho_tran_direto(size_t node_id){
-    
-    vector<size_t> noContatos;
-    vector<size_t> noProcurados;
-    vector<size_t> final;
-    if(search_for_node(node_id)==nullptr){
-    cout<<"digite um No valido";
-    return final;
-    }
-    noContatos.push_back(node_id);
-    size_t no_id_inicial=node_id;
-    Node* no;
-    Edge* aresta;
-    while(!noContatos.empty()){
-        bool taNoVetor = ta_no_vetor(noProcurados,node_id);     
-        if (taNoVetor){
-            noContatos.pop_back();
-            continue;
-        }           
-        no = search_for_node(noContatos.back());
-        aresta = no->_first_edge;
-        node_id = no->_id;
-        if(no_id_inicial!=noContatos.back()){
-
-        final.push_back(noContatos.back());
+    vector<size_t> final = this->arvore_caminho_profundidade(node_id);
+    final.erase(final.begin());
+    if(final.size() > 0){
+        cout<<"Fecho transitivo direto do vértices "<<node_id<<" constituído pelos vértices: "; 
+        for (auto i : final){
+            cout << i << " ";
         }
-        noContatos.pop_back();
-        for (size_t i = 0; i < no->_number_of_edges; i++)
-        {  
-            noContatos.push_back(aresta->_target_id);
-            aresta=aresta->_next_edge;
-        }
-
-        noProcurados.push_back(noContatos.front());
+    } else {
+        cout << "O fecho transitivo direto do nó " << node_id << " é vazio. \n";
     }
-    if(final.size()==0){
-        cout<<"No "<< no_id_inicial<<" nao possui contato com ninguem"<<endl;
-    }else{
-
-    
-    for (size_t i = 0; i < final.size(); i++)
-    {
-        cout<<"Nos em contato com o No "<<no_id_inicial<<":"<<final[i]<<endl;
-    }
-    }
-    
-    // O processo para grafo direcionado e nao direcionado é diferente
-    
-
     return final;
 }
 
+vector<size_t> Graph::fecho_tran_indireto(size_t node_id){
+    vector<size_t> retorno;
+    vector<size_t> caminhoDoNo;
+    bool adicionar;
+    for(Node* no = this->_first; no != nullptr; no = no->_next_node){
+        adicionar = false;
+        if(no->_id == node_id){ // ignora o próprio nó
+            continue;
+        }
+        
+        caminhoDoNo = arvore_caminho_profundidade(no->_id); // faz a busca em profundidade de no->id
+        
+        for(size_t elemento : caminhoDoNo){
+            if(elemento == node_id){
+                adicionar = true; // se achar um igual ao alvo, quer dizer que o no enxerga o ele, entao sinaliza
+            }
+        }
+        if(adicionar){
+            retorno.push_back(no->_id);
+        }
+    }
+    if(retorno.size() > 0){
+        cout << "O fecho transitivo indireto do vértice " << node_id << " é constituido pelos vértices: ";
+        for(auto i : retorno){
+            cout << i << " ";
+        }
+    } else {
+        cout << "O fecho transitivido indireto do vértice " << node_id << " é vazio.\n";
+    }
+    return retorno;
+}
 
 // Sempre que usar isso, confira se o retorno foi nullptr! Se nao for e voce tentar usar algum atributo,
 // vai dar core dumped
@@ -611,14 +604,13 @@ void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
 }
 
 void Graph::determinar_excentricidades(){
-    cout << "Numero de nós: " << _number_of_nodes << endl;
+    
     for(size_t i = 1; i < this->_number_of_nodes; i++){
-        cout << "Primeiro laço == " << i << endl;
         size_t exc = 0;
         for(size_t j = 1; j < this->_number_of_nodes; j++){
             if(i != j){ // nao analisa iguais
-                pair<size_t, string> dijkstra = this->dijkstra(i,j);
-                cout << "chamando dijkstra " << i << " - " << j << endl;
+                pair<size_t, string> dijkstra = this->dijkstra(i,j); // determina menor caminho
+                
                 if(dijkstra.first != infinito){
                     if (dijkstra.first > exc){
                         exc = dijkstra.first;
@@ -730,6 +722,7 @@ void Graph::desvisitar_todos(){
 }
 
 void Graph::calcularFloydTodo(){//size_t inicial, size_t destino){
+    
     size_t n = this->_number_of_nodes;
     // vector<Edge*> passou_por_onde;
     vector<vector<float>> matrizFloyd(n+1, vector<float>(n+1, infinito)); // cria matriz de tamanho n+1 e infinito em todo mundo
@@ -752,26 +745,12 @@ void Graph::calcularFloydTodo(){//size_t inicial, size_t destino){
     }
     // vector<Edge*> allArestas = this->allEdges();
     this->matrizFloyd = matrizFloyd; // facilidade de acesso. provavelmente nao precisa 
-    // cout << "size = " << matrizFloyd.size();
-    // size_t n = matrizFloyd.size();
+    
     for (size_t k = 1; k <= n; k++) {
         for (size_t i = 1; i <= n; i++) {
             for (size_t j = 1; j <= n; j++) {
                 if (this->matrizFloyd[i][k] < infinito && this->matrizFloyd[k][j] < infinito) {
                     this->matrizFloyd[i][j] = min(this->matrizFloyd[i][j], this->matrizFloyd[i][k] + this->matrizFloyd[k][j]);
-                    // for (Edge* aresta : allArestas) {
-                    //     if(this->matrizFloyd[i][k] + this->matrizFloyd[k][j] < this->matrizFloyd[i][j]){
-                    //         if (aresta->_source_id == inicial && aresta->_target_id == k) {
-                    //             passou_por_onde.push_back(aresta);
-                    //             break;
-                    //         }
-                    //     } else {
-                    //         if (aresta->_source_id == inicial && aresta->_target_id == destino) {
-                    //             passou_por_onde.push_back(aresta);
-                    //             break;
-                    //         }
-                    //     }
-                    // }
                 }
             }
         }
@@ -780,7 +759,7 @@ void Graph::calcularFloydTodo(){//size_t inicial, size_t destino){
 
 size_t Graph::floyd(size_t inicio, size_t destino) {
     this->calcularFloydTodo();
-    cout << "Custo mínimo de " << inicio << " até " << destino << " = " << this->matrizFloyd[inicio][destino];
+    // cout << "Custo mínimo de " << inicio << " até " << destino << " = " << this->matrizFloyd[inicio][destino];
     // vector<Edge*> retorno;
     // vector<size_t> vertices;
     // size_t n = this->_number_of_nodes;
@@ -802,6 +781,7 @@ size_t Graph::floyd(size_t inicio, size_t destino) {
     // }
     // return retorno;
     return this->matrizFloyd[inicio][destino];
+    
 }
 
 vector<Edge*> Graph::allEdges(){

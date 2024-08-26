@@ -1,3 +1,12 @@
 
-====== Caminho Mínimo (Floyd) de 1 até 6 ======
-Custo = 11
+====== Fecho Transitivo Direto do nó 1 ======
+O fecho transitivo direto do vértice 1 é constituido pelos vértices: 2 3 4 5 
+
+====== Fecho Transitivo Inireto do nó 3 ======
+O fecho transitivo indireto do vértice 3 é constituido pelos vértices: 1 2 
+
+====== Fecho Transitivo Inireto do nó 1 ======
+O fecho transitivo indireto do nó 1 é vazio. 
+
+====== Fecho Transitivo Direto do nó 5 ======
+O fecho transitivo direto do nó 5 é vazio. 

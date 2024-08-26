@@ -29,6 +29,7 @@ public:
     void calcularFloydTodo();//size_t inicial, size_t destino);
     pair<size_t,string> dijkstra(size_t orig, size_t dest);
     vector<size_t> fecho_tran_direto(size_t node_id);
+    vector<size_t> fecho_tran_indireto(size_t node_id);
     vector<Edge*> agmKruskal(vector<Edge*> arestas, size_t n);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
     vector<size_t> arvore_caminho_profundidade(size_t noInicial);
