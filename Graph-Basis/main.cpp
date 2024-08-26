@@ -14,7 +14,7 @@ int menu() {
         cout << endl;
         cout << "   ------  MENU ------" << endl;
         cout << "[1] Fecho transitivo direto de um vertice" << endl; // ok 
-        cout << "[2] Fecho transitivo indireto de um vertice" << endl;  // FALTA
+        cout << "[2] Fecho transitivo indireto de um vertice" << endl;  // ok
         cout << "[3] Caminho minimo entre dois vertices - Dijkstra" << endl; // ok
         cout << "[4] Caminho minimo entre dois vertices - Floyd" << endl; // ok
         cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl; // ok
@@ -513,6 +513,7 @@ int main(int argc, char* argv[]){
     }
     arquivo_entrada.close();
     arquivo_saida.close();
+    grafo->~Graph();
     
     return 0;
 }
