@@ -526,6 +526,24 @@ int main(int argc, char* argv[]){
                     cout << point << " ";
                 }
                 cout << endl;
+
+                char salvar = 'w';
+                while (salvar != 's' && salvar != 'n'){
+                    cout << "\n\nSalvar resposta no arquivo de saída especificado? (s/n) ";
+                    cin >> salvar;
+                }
+                if (salvar == 's'){
+                    cout << "Saída salva.\n";
+                    arquivo_saida << "\n====== Pontos de Articulação" << " ======\n";
+                    for (size_t point : pontos_articulados) {
+                        arquivo_saida << point << " ";
+                    }
+
+                    grafo->exportar(grafo->allEdges(), arquivo_saida);
+                } else {
+                    cout <<"\nOk";
+                    break;
+                }
                 break;
             }
             case 99:
