@@ -187,7 +187,7 @@ int main(int argc, char* argv[]){
                     cout << "\nSalvar resposta no arquivo de saída especificado? (s/n) ";
                     cin >> salvar;
                 }
-                if (salvar == 's'){ // exported
+                if (salvar == 's'){ 
                     cout << "Saída salva.\n";
                     arquivo_saida << "\n====== Caminho Mínimo (Algoritmo de Dijkstra) do nó " << origem << " até o nó " << destino << " ======\n";
                     arquivo_saida << "Dijkstra: "<<resposta.second<<endl;
