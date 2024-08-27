@@ -835,11 +835,11 @@ Edge* Graph::getAresta(size_t no1, size_t no2){
 }
 
 int Graph::getGrauNo(size_t node_id) {
-    int degree = 0;
+    int grau = 0;
     for (Edge* aresta = search_for_node(node_id)->_first_edge; aresta != nullptr; aresta = aresta->_next_edge) {
-        degree++;
+        grau++;
     }
-    return degree;
+    return grau;
 }
 
 void Graph::caminho_prof_pontos_artc_nao_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time) {
@@ -874,7 +874,7 @@ void Graph::caminho_prof_pontos_artc_nao_direcionado(size_t node_id, size_t pare
     }
 }
 
-vector<size_t> Graph::getPontosArticulacao() {
+vector<size_t> Graph::getPontosArticulacaoNaoDirecionado() {
     vector<size_t> articulation_points;
     vector<int> discovery(this->_number_of_nodes + 1, -1);
     vector<int> low(this->_number_of_nodes + 1, -1);
@@ -903,7 +903,7 @@ vector<size_t> Graph::getPontosArticulacaoDirecionados() {
 
     for (size_t i = 1; i <= _number_of_nodes; i++) {
         if (!visited[i]) {
-            dfsArticulationPointsDirected(i, -1, pontos_articulacao, discovery, low, visited, time);
+            caminho_prof_pontos_art_direcionado(i, -1, pontos_articulacao, discovery, low, visited, time);
         }
     }
 
@@ -914,7 +914,7 @@ vector<size_t> Graph::getPontosArticulacaoDirecionados() {
     return pontos_articulacao;
 }
 
-void Graph::dfsArticulationPointsDirected(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time) {
+void Graph::caminho_prof_pontos_art_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time) {
     visited[node_id] = true;
     discovery[node_id] = low[node_id] = ++time;
     int children = 0;
@@ -924,7 +924,7 @@ void Graph::dfsArticulationPointsDirected(size_t node_id, size_t parent_id, vect
 
         if (!visited[vizinho_id]) {
             children++;
-            dfsArticulationPointsDirected(vizinho_id, node_id, pontos_articulacao, discovery, low, visited, time);
+            caminho_prof_pontos_art_direcionado(vizinho_id, node_id, pontos_articulacao, discovery, low, visited, time);
 
             // Atualiza low[node_id] considerando o menor valor alcançável
             low[node_id] = min(low[node_id], low[vizinho_id]);

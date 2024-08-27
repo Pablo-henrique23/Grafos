@@ -59,11 +59,11 @@ public:
     size_t getNumberOfNodes();
     bool getWeighted_edges();
     bool getWeighted_nodes();
-    vector<size_t> getPontosArticulacao();
+    int getGrauNo(size_t node_id);
+    vector<size_t> getPontosArticulacaoNaoDirecionado();
     void caminho_prof_pontos_artc_nao_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time);
     vector<size_t> getPontosArticulacaoDirecionados();
-    void dfsArticulationPointsDirected(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time);
-    int getGrauNo(size_t node_id);
+    void caminho_prof_pontos_art_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time);
     
     void exportar(vector<Edge*> arestas, ofstream& arquivo_saida);
     void lista_adjacencia(ofstream& arquivo_saida);

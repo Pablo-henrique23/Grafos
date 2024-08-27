@@ -519,7 +519,7 @@ int main(int argc, char* argv[]){
                 if(grafo->getDirected()){
                     pontos_articulados = grafo->getPontosArticulacaoDirecionados();
                 } else {
-                    pontos_articulados = grafo->getPontosArticulacao();
+                    pontos_articulados = grafo->getPontosArticulacaoNaoDirecionado();
                 }
                 cout << "Pontos de Articulação: ";
                 for (size_t point : pontos_articulados) {
