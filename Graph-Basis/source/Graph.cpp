@@ -84,32 +84,30 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-    // Node* no = this->_first;
-    // Node* nextNode = nullptr;
-    // Edge* aresta = no->_first_edge;
-    // Edge* nextEdge = nullptr;
-    // cout << "nEdges = " << this->_number_of_edges << endl;
-    // int i = 0;
-    // while(aresta != nullptr){
-    //     nextEdge = aresta->_next_edge;
-    //     delete aresta;
-    //     i++;
-    //     aresta = nextEdge;
-    //     this->_number_of_edges--;
-    // }
-    // cout << "i = " << i << endl;
-    // while(no != nullptr){
-    //     nextNode = no->_next_node;
-    //     delete no;
-    //     no = nextNode;
-    //     this->_number_of_nodes--;
-    // }
+     Node* no = this->_first;
+    Node* nextNode = nullptr;
+    while (no != nullptr) {
+        Edge* aresta = no->_first_edge;
+        Edge* nextEdge = nullptr;
+        int i = 0;
+        while (aresta != nullptr) {
+            nextEdge = aresta->_next_edge;
+            delete aresta;
+            aresta = nextEdge;
+            this->_number_of_edges--;
+            i++;
+        }
+        nextNode = no->_next_node;
+        delete no;
+        no = nextNode;
+        this->_number_of_nodes--;
+    }
     
-    // cout << "Edges: " << this->_number_of_edges;
-    // if(this->_number_of_edges > 0){
-    //     cout << "ta sobrando";
-    // }
-    // cout << "\nNodes: " <<this->_number_of_nodes;
+    cout << "Edges: " << this->_number_of_edges << endl;
+    if (this->_number_of_edges > 0) {
+        cout << "ta sobrando";
+    }
+    cout << "\nNodes: " << this->_number_of_nodes << endl;
 }
 void Graph::remove_node(size_t node_position)
 {
