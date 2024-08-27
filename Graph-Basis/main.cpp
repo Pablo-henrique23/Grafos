@@ -13,15 +13,15 @@ int menu() {
         again = false;
         cout << endl;
         cout << "   ------  MENU ------" << endl;
-        cout << "[1] Fecho transitivo direto de um vertice" << endl; // ok -> falta salvar
-        cout << "[2] Fecho transitivo indireto de um vertice" << endl;  
-        cout << "[3] Caminho minimo entre dois vertices - Dijkstra" << endl; // completo
-        cout << "[4] Caminho minimo entre dois vertices - Floyd" << endl;
-        cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl; // feito (conferir erros) -> falta salvar
-        cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl; // feito (conferir erros) -> falta salvar
-        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // completo
-        cout << "[8] Raio, centro, diametro e periferia do grafo" << endl; // completo
-        cout << "[9] Conjunto de vertices de articulacao" << endl;
+        cout << "[1] Fecho transitivo direto de um vertice" << endl; // ok 
+        cout << "[2] Fecho transitivo indireto de um vertice" << endl;  // ok
+        cout << "[3] Caminho minimo entre dois vertices - Dijkstra" << endl; // ok
+        cout << "[4] Caminho minimo entre dois vertices - Floyd" << endl; // ok
+        cout << "[5] Arvore Geradora Mínima de subgrafo vertice-induzido - Prim" << endl; // ok
+        cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl; // ok 
+        cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // ok
+        cout << "[8] Raio, centro, diametro e periferia do grafo" << endl; // ok
+        cout << "[9] Conjunto de vertices de articulacao" << endl; // conferir 
         cout << "[0] Sair" << endl;
         cout << "Escolha: ";
         cin >> selecao;
@@ -94,17 +94,74 @@ int main(int argc, char* argv[]){
                     cout<<"\nDigite o id do No desejado: ";
                     size_t id;
                     cin>>id;
+                    vector<size_t> retorno;
+                    vector<Edge*> arestas;
                     if(cin){
-                        grafo->fecho_tran_direto(id);
+                        retorno = grafo->fecho_tran_direto(id, arestas);
                     }else{
                         cout<<"\nDigite um numero: ";
                     }
-                    //  grafo->print_graph();
+                    char salvar = 'w';
+                    while (salvar != 's' && salvar != 'n'){
+                        cout << "\nSalvar resposta no arquivo de saída especificado? (s/n) ";
+                        cin >> salvar;
+                    }
+                    if (salvar == 's'){
+                        cout << "Saída salva.\n";
+                        arquivo_saida << "\n====== Fecho Transitivo Direto do nó " << id << " ======\n";
+                        if(retorno.size() > 0){
+                            arquivo_saida << "O fecho transitivo direto do vértice " << id << " é constituido pelos vértices: ";
+                            for (auto i : retorno){
+                                arquivo_saida << i << " ";
+                            }
+                            arquivo_saida << endl;
+                        } else {
+                            arquivo_saida << "O fecho transitivo direto do nó " << id << " é vazio. \n";
+                        }
+                        grafo->exportar(arestas, arquivo_saida);
+                    } else if (salvar == 'n'){
+                        cout <<"\nOk";
+                    }
                 }
                 break;
             }
             case 2:
             {
+                if (grafo->getDirected() == false){
+                    cout << "Operação inválida, grafo não direcionado.\n";
+                } else {
+                    cout<<"\nDigite o id do No desejado: ";
+                    size_t id;
+                    cin>>id;
+                    vector<size_t> retorno;
+                    vector<Edge*> arestas;
+                    if(cin){
+                        retorno = grafo->fecho_tran_indireto(id, arestas);
+                    }else{
+                        cout<<"\nDigite um numero: ";
+                    }
+                    char salvar = 'w';
+                    while (salvar != 's' && salvar != 'n'){
+                        cout << "\nSalvar resposta no arquivo de saída especificado? (s/n) ";
+                        cin >> salvar;
+                    }
+                    if (salvar == 's'){
+                        cout << "Saída salva.\n";
+                        arquivo_saida << "\n====== Fecho Transitivo Inireto do nó " << id << " ======\n";
+                        if(retorno.size() > 0){
+                            arquivo_saida << "O fecho transitivo indireto do vértice " << id << " é constituido pelos vértices: ";
+                            for (auto i : retorno){
+                                arquivo_saida << i << " ";
+                            }
+                            arquivo_saida << endl;
+                        } else {
+                            arquivo_saida << "O fecho transitivo indireto do nó " << id << " é vazio. \n";
+                        }
+                        grafo->exportar(arestas, arquivo_saida);
+                    } else if (salvar == 'n'){
+                        cout <<"\nOk";
+                    }
+                }
                 break;
             }
             case 3:
@@ -130,12 +187,13 @@ int main(int argc, char* argv[]){
                     cout << "\nSalvar resposta no arquivo de saída especificado? (s/n) ";
                     cin >> salvar;
                 }
-                if (salvar == 's'){
+                if (salvar == 's'){ 
                     cout << "Saída salva.\n";
                     arquivo_saida << "\n====== Caminho Mínimo (Algoritmo de Dijkstra) do nó " << origem << " até o nó " << destino << " ======\n";
                     arquivo_saida << "Dijkstra: "<<resposta.second<<endl;
                     arquivo_saida << "Custo: "<<resposta.first<<endl;
-                } else {
+                    arquivo_saida << "\n" << resposta.second << endl;
+                } else if (salvar == 'n'){
                     cout <<"\nOk";
                     break;
                 }
@@ -153,7 +211,10 @@ int main(int argc, char* argv[]){
                     break;
                 }
                 cout << endl;
-                size_t resultado = grafo->floyd(inicio, destino);
+                pair<size_t,string> resposta=grafo->floyd(inicio, destino);
+                size_t resultado = resposta.first;
+                cout << "Custo para ir de " << inicio << " ate " << destino << ": " << resultado<<endl;
+                cout<<"Caminho para ir de "<<inicio<<" ate "<<destino<<": "<<resposta.second;
                 cout << endl;
                 char salvar = 'w';
                 while(salvar != 's' && salvar != 'n'){
@@ -164,6 +225,8 @@ int main(int argc, char* argv[]){
                     cout << "Resultado salvo.\n";
                     arquivo_saida << "\n====== Caminho Mínimo (Floyd) de " << inicio << " até " << destino << " ======\n";
                     arquivo_saida << "Custo = " << resultado << endl;
+                    arquivo_saida<<"Caminho = "<< resposta.second<<endl;
+		    arquivo_saida << endl << resposta.second;
                 } else if (salvar == 'n'){
                     cout << "Ok\n";
                 }
@@ -214,7 +277,7 @@ int main(int argc, char* argv[]){
                                 vertices.push_back(noI->_id);
                             }
                             arestas = grafo->gerarVerticeInduzido(vertices);
-                            resultado = grafo->agmPrim(arestas, vertices.size());
+                            resultado = grafo->agmPrim(arestas, grafo->getNumberOfNodes());
                             running = false;
                         } else {
                             if(grafo->ta_no_vetor(vertices,v)){
@@ -240,11 +303,13 @@ int main(int argc, char* argv[]){
                     cout << "Salvando.\n";
                     size_t peso_total = 0;
                     arquivo_saida << "\n====== Árvore Geradora Mínima (Prim) ======\n";
+                    arquivo_saida << endl;
                     for(Edge* i : resultado){
                         arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
                         peso_total += i->_weight;
                     }
                     arquivo_saida << "\nCusto total: " << peso_total << endl;
+                    grafo->exportar(resultado, arquivo_saida);
                 } else if(salvar == 'n') {
                     cout << "Ok\n";
                     break;
@@ -330,12 +395,12 @@ int main(int argc, char* argv[]){
                         peso_total += i->_weight;
                     }
                     arquivo_saida << "\nCusto total: " << peso_total << endl;
+                    grafo->exportar(arestas, arquivo_saida);
                 } else if(salvar == 'n') {
                     cout << "Ok\n";
                     break;
                 }
-                arestas.clear();
-                vertices.clear();
+
                 break;
             }
             case 7: // caminhamento em profundidade a partir do vertice V
@@ -351,7 +416,8 @@ int main(int argc, char* argv[]){
                         break;
                     }
                 }
-                vector<size_t> resultado = grafo->arvore_caminho_profundidade(v);
+                vector<Edge*> arestas;
+                vector<size_t> resultado = grafo->arvore_caminho_profundidade(v, arestas);
                 size_t ultimo = resultado.back();
                 for (size_t t : resultado){
                     if(t != ultimo){
@@ -375,6 +441,7 @@ int main(int argc, char* argv[]){
                                 arquivo_saida << t << "\n" ;
                             }
                         }
+                        grafo->exportar(arestas, arquivo_saida);
                         break;
                     } else if (salvar == 'n'){
                         cout << "\nOk.";
@@ -439,7 +506,7 @@ int main(int argc, char* argv[]){
                             arquivo_saida << i << endl;
                         }
                     }
-
+                    grafo->exportar(grafo->allEdges(), arquivo_saida);
                 } else {
                     cout <<"\nOk";
                     break;
@@ -450,7 +517,7 @@ int main(int argc, char* argv[]){
             {
                 vector<size_t> pontos_articulados;
                 if(grafo->getDirected()){
-                    pontos_articulados = grafo->getPontosArticulacaoDirecionado();
+                    pontos_articulados = grafo->getPontosArticulacaoDirecionados();
                 } else {
                     pontos_articulados = grafo->getPontosArticulacao();
                 }
@@ -463,7 +530,7 @@ int main(int argc, char* argv[]){
             }
             case 99:
             {
-                grafo->lista_adjacencia(arquivo_saida);
+                grafo->exportar(grafo->allEdges(), arquivo_saida);
                 cout << "Salvando lista no arquivo de saída fornecido\n";
                 break;
             }
@@ -471,6 +538,7 @@ int main(int argc, char* argv[]){
     }
     arquivo_entrada.close();
     arquivo_saida.close();
+    grafo->~Graph();
     
     return 0;
 }

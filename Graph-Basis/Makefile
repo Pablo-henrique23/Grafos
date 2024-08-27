@@ -7,12 +7,12 @@ INC_DIR := include
 
 # Files
 SRCS := $(wildcard $(SRC_DIR)/*.cpp) main.cpp
-OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(SRC_DIR)/%.o,$(filter-out main.cpp,$(SRCS)))
+OBJS := $(patsubst $(SRC_DIR)/%.cpp,%.o,$(filter-out main.cpp,$(SRCS)))
 MAIN_OBJ := main.o
 DEPS := $(wildcard $(INC_DIR)/*.hpp)
 
 # Compiler flags
-CXXFLAGS := -std=c++11 -Wall -Wextra -I$(INC_DIR)
+CXXFLAGS := -std=c++11 -Wall -Wextra
 
 # Output executable
 TARGET := graph_project
@@ -24,12 +24,11 @@ all: $(TARGET)
 $(TARGET): $(OBJS) $(MAIN_OBJ)
 	$(CXX) $(CXXFLAGS) $^ -o $@
 
-$(SRC_DIR)/%.o: $(SRC_DIR)/%.cpp $(DEPS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+%.o: $(SRC_DIR)/%.cpp $(DEPS)
+	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c $< -o $@
 
 $(MAIN_OBJ): main.cpp $(DEPS)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -I$(INC_DIR) -c $< -o $@
 
 clean:
-	@del /q $(SRC_DIR)\*.o
-	@del /q $(MAIN_OBJ) $(TARGET)
+	@rm -f $(OBJS) $(MAIN_OBJ) $(TARGET)

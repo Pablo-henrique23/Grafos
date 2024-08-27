@@ -11,9 +11,9 @@ using namespace std;
 
 
 Conjunto::Conjunto(size_t n){
-    pai.resize(n);
-    altura.resize(n,0);
-    for (size_t i = 1; i <= n; ++i) {
+    pai.resize(n+1);
+    altura.resize(n+1,0);
+    for (size_t i = 1; i <= n; i++) {
         pai[i] = i;
     }
 }
