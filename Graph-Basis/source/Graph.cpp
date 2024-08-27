@@ -825,40 +825,35 @@ Edge* Graph::getAresta(size_t no1, size_t no2){
     return nullptr;
 }
 
-void Graph::caminho_prof_pontos_artc(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time) {
+void Graph::caminho_prof_pontos_artc_nao_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time) {
     Node* node = search_for_node(node_id);
     visited[node_id] = true;
+    is_in_stack[node_id] = true;
+    stk.push(node_id);
 
-    // Inicializa o tempo de descoberta e o valor de low
     discovery[node_id] = low[node_id] = ++time;
     int filhos = 0;
-    bool is_articulation = false;
 
     for (Edge* aresta = node->_first_edge; aresta != nullptr; aresta = aresta->_next_edge) {
         size_t vizinho_id = aresta->_target_id;
-        Node* vizinho = search_for_node(vizinho_id);
 
         if (!visited[vizinho_id]) {
-            // Se o vizinho não foi visitado, é um filho do nó atual
             filhos++;
-            caminho_prof_pontos_artc(vizinho_id, node_id, pontos_articulacao, discovery, low, visited, time);
+            caminho_prof_pontos_artc_nao_direcionado(vizinho_id, node_id, pontos_articulacao, discovery, low, visited, is_in_stack, stk, time);
 
             // Atualiza o valor de low[node_id] com o menor valor alcançável a partir do vizinho
             low[node_id] = min(low[node_id], low[vizinho_id]);
 
-            // Se o nó atual não é raiz e low[vizinho_id] >= discovery[node_id], é um ponto de articulação
-            if (parent_id != node_id && low[vizinho_id] >= discovery[node_id]) {
-                is_articulation = true;
+            // Para grafos não direcionados e direcionados
+            if ((parent_id == node_id && filhos > 1) || 
+                (parent_id != node_id && low[vizinho_id] >= discovery[node_id])) {
+                pontos_articulacao.push_back(node_id);
             }
-        } else if (vizinho_id != parent_id) {
+
+        } else if (is_in_stack[vizinho_id] && vizinho_id != parent_id) {
             // Atualiza low[node_id] para considerar a aresta de retorno
             low[node_id] = min(low[node_id], discovery[vizinho_id]);
         }
-    }
-
-    // Se é raiz e tem mais de um filho, ou se a condição de articulação foi satisfeita
-    if ((parent_id == node_id && filhos > 1) || is_articulation) {
-        pontos_articulacao.push_back(node_id);
     }
 }
 
@@ -867,16 +862,74 @@ vector<size_t> Graph::getPontosArticulacao() {
     vector<int> discovery(this->_number_of_nodes + 1, -1);
     vector<int> low(this->_number_of_nodes + 1, -1);
     vector<bool> visited(this->_number_of_nodes + 1, false);
+    vector<bool> is_in_stack(this->_number_of_nodes + 1, false);
+    stack<size_t> stk;
     int time = 0;
 
     for (size_t i = 1; i <= this->_number_of_nodes; i++) {
         if (!visited[i]) {
-            caminho_prof_pontos_artc(i, i, articulation_points, discovery, low, visited, time);
+            caminho_prof_pontos_artc_nao_direcionado(i, i, articulation_points, discovery, low, visited, is_in_stack, stk, time);
         }
     }
 
-    // Ordenar os pontos de articulação
     sort(articulation_points.begin(), articulation_points.end());
 
     return articulation_points;
 }
+
+void Graph::caminho_prof_pontos_artc_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time) {
+    Node* node = search_for_node(node_id);
+    visited[node_id] = true;
+    is_in_stack[node_id] = true;
+    stk.push(node_id);
+
+    discovery[node_id] = low[node_id] = ++time;
+    int filhos = 0;
+
+    for (Edge* aresta = node->_first_edge; aresta != nullptr; aresta = aresta->_next_edge) {
+        size_t vizinho_id = aresta->_target_id;
+
+        if (!visited[vizinho_id]) {
+            filhos++;
+            caminho_prof_pontos_artc_direcionado(vizinho_id, node_id, pontos_articulacao, discovery, low, visited, is_in_stack, stk, time);
+
+            // Atualiza low[node_id] com o menor valor alcançável a partir do vizinho
+            low[node_id] = min(low[node_id], low[vizinho_id]);
+
+            // Condição para ponto de articulação em grafos direcionados
+            if (parent_id == node_id && filhos > 1) {
+                pontos_articulacao.push_back(node_id);
+            } else if (parent_id != node_id && low[vizinho_id] >= discovery[node_id]) {
+                pontos_articulacao.push_back(node_id);
+            }
+
+        } else if (is_in_stack[vizinho_id]) {
+            // Atualiza low[node_id] para considerar arestas de retorno (somente se discovery[vizinho_id] < low[node_id])
+            low[node_id] = min(low[node_id], discovery[vizinho_id]);
+        }
+    }
+
+    is_in_stack[node_id] = false;
+    stk.pop();
+}
+
+vector<size_t> Graph::getPontosArticulacaoDirecionado() {
+    vector<size_t> articulation_points;
+    vector<int> discovery(this->_number_of_nodes + 1, -1);
+    vector<int> low(this->_number_of_nodes + 1, -1);
+    vector<bool> visited(this->_number_of_nodes + 1, false);
+    vector<bool> is_in_stack(this->_number_of_nodes + 1, false);
+    stack<size_t> stk;
+    int time = 0;
+
+    for (size_t i = 1; i <= this->_number_of_nodes; i++) {
+        if (!visited[i]) {
+            caminho_prof_pontos_artc_direcionado(i, i, articulation_points, discovery, low, visited, is_in_stack, stk, time);
+        }
+    }
+
+    sort(articulation_points.begin(), articulation_points.end());
+
+    return articulation_points;
+}
+

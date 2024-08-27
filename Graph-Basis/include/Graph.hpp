@@ -40,8 +40,8 @@ public:
     void determinar_centro();
     void determinar_periferia();
     void desvisitar_todos();
-    void caminho_prof_pontos_artc(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time);
-
+    void caminho_prof_pontos_artc_nao_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time);
+    void caminho_prof_pontos_artc_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time);
 
     Node* search_for_node(size_t node_id);
     bool taNoGrafo(size_t id);
@@ -62,6 +62,7 @@ public:
     bool getWeighted_edges();
     bool getWeighted_nodes();
     vector<size_t> getPontosArticulacao();
+    vector<size_t> getPontosArticulacaoDirecionado();
     
 
     void lista_adjacencia(ofstream& arquivo_saida);

@@ -448,7 +448,12 @@ int main(int argc, char* argv[]){
             }
             case 9:
             {
-                vector<size_t> pontos_articulados = grafo->getPontosArticulacao();
+                vector<size_t> pontos_articulados;
+                if(grafo->getDirected()){
+                    pontos_articulados = grafo->getPontosArticulacaoDirecionado();
+                } else {
+                    pontos_articulados = grafo->getPontosArticulacao();
+                }
                 cout << "Pontos de Articulação: ";
                 for (size_t point : pontos_articulados) {
                     cout << point << " ";
