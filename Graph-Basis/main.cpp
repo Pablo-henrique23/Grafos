@@ -354,7 +354,7 @@ int main(int argc, char* argv[]){
                                 vertices.push_back(noI->_id);
                             }
                             arestas = grafo->gerarVerticeInduzido(vertices);
-                            resultado = grafo->agmKruskal(arestas, grafo->getNumberOfNodes()+1);
+                            resultado = grafo->agmKruskal(arestas, vertices.size());
                             running = false;
                         } else {
                             if (grafo->ta_no_vetor(vertices, v)){ // repetido
