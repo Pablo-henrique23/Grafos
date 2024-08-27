@@ -1,3 +1,0 @@
-
-====== Caminho Mínimo (Floyd) de 1 até 6 ======
-Custo = 11
