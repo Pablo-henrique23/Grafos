@@ -95,8 +95,9 @@ int main(int argc, char* argv[]){
                     size_t id;
                     cin>>id;
                     vector<size_t> retorno;
+                    vector<Edge*> arestas;
                     if(cin){
-                        retorno = grafo->fecho_tran_direto(id);
+                        retorno = grafo->fecho_tran_direto(id, arestas);
                     }else{
                         cout<<"\nDigite um numero: ";
                     }
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]){
                         } else {
                             arquivo_saida << "O fecho transitivo direto do nó " << id << " é vazio. \n";
                         }
+                        grafo->exportar(arestas, arquivo_saida);
                     } else if (salvar == 'n'){
                         cout <<"\nOk";
                     }
@@ -132,8 +134,9 @@ int main(int argc, char* argv[]){
                     size_t id;
                     cin>>id;
                     vector<size_t> retorno;
+                    vector<Edge*> arestas;
                     if(cin){
-                        retorno = grafo->fecho_tran_indireto(id);
+                        retorno = grafo->fecho_tran_indireto(id, arestas);
                     }else{
                         cout<<"\nDigite um numero: ";
                     }
@@ -154,6 +157,7 @@ int main(int argc, char* argv[]){
                         } else {
                             arquivo_saida << "O fecho transitivo indireto do nó " << id << " é vazio. \n";
                         }
+                        grafo->exportar(arestas, arquivo_saida);
                     } else if (salvar == 'n'){
                         cout <<"\nOk";
                     }
@@ -291,14 +295,16 @@ int main(int argc, char* argv[]){
                     cout << salvar << endl;
                 }
                 if(salvar == 's'){
-                    cout << "Salvando.\n";
-                    size_t peso_total = 0;
-                    arquivo_saida << "\n====== Árvore Geradora Mínima (Prim) ======\n";
-                    for(Edge* i : resultado){
-                        arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
-                        peso_total += i->_weight;
-                    }
-                    arquivo_saida << "\nCusto total: " << peso_total << endl;
+                    // cout << "Salvando.\n";
+                    // size_t peso_total = 0;
+                    // arquivo_saida << "\n====== Árvore Geradora Mínima (Prim) ======\n";
+                    grafo->exportar(resultado, arquivo_saida);
+                    // arquivo_saida << endl;
+                    // for(Edge* i : resultado){
+                    //     arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
+                    //     peso_total += i->_weight;
+                    // }
+                    // arquivo_saida << "\nCusto total: " << peso_total << endl;
                 } else if(salvar == 'n') {
                     cout << "Ok\n";
                     break;
@@ -404,7 +410,8 @@ int main(int argc, char* argv[]){
                         break;
                     }
                 }
-                vector<size_t> resultado = grafo->arvore_caminho_profundidade(v);
+                vector<Edge*> arestas;
+                vector<size_t> resultado = grafo->arvore_caminho_profundidade(v, arestas);
                 size_t ultimo = resultado.back();
                 for (size_t t : resultado){
                     if(t != ultimo){
@@ -505,7 +512,7 @@ int main(int argc, char* argv[]){
             }
             case 99:
             {
-                grafo->lista_adjacencia(arquivo_saida);
+                grafo->exportar(grafo->allEdges(), arquivo_saida);
                 cout << "Salvando lista no arquivo de saída fornecido\n";
                 break;
             }

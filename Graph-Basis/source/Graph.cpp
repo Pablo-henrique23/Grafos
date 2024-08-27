@@ -374,8 +374,8 @@ int Graph::conected(size_t node_id_1, size_t node_id_2)
 }
 
 
-vector<size_t> Graph::fecho_tran_direto(size_t node_id){
-    vector<size_t> final = this->arvore_caminho_profundidade(node_id);
+vector<size_t> Graph::fecho_tran_direto(size_t node_id, vector<Edge*>& retArestas){
+    vector<size_t> final = this->arvore_caminho_profundidade(node_id, retArestas);
     final.erase(final.begin());
     if(final.size() > 0){
         cout<<"Fecho transitivo direto do vértices "<<node_id<<" constituído pelos vértices: "; 
@@ -388,7 +388,7 @@ vector<size_t> Graph::fecho_tran_direto(size_t node_id){
     return final;
 }
 
-vector<size_t> Graph::fecho_tran_indireto(size_t node_id){
+vector<size_t> Graph::fecho_tran_indireto(size_t node_id, vector<Edge*>& retArestas){
     vector<size_t> retorno;
     vector<size_t> caminhoDoNo;
     bool adicionar;
@@ -398,7 +398,7 @@ vector<size_t> Graph::fecho_tran_indireto(size_t node_id){
             continue;
         }
         
-        caminhoDoNo = arvore_caminho_profundidade(no->_id); // faz a busca em profundidade de no->id
+        caminhoDoNo = arvore_caminho_profundidade(no->_id, retArestas); // faz a busca em profundidade de no->id
         
         for(size_t elemento : caminhoDoNo){
             if(elemento == node_id){
@@ -608,22 +608,24 @@ vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas, size_t n){
     return retorno;
 }
 
-vector<size_t> Graph::arvore_caminho_profundidade(size_t noInicial){
+vector<size_t> Graph::arvore_caminho_profundidade(size_t noInicial, vector<Edge*>& retArestas){
     // inicializa tudo em falso por garantia --> se so o construtor fizer isso, a segunda vez que for usar o [7] vai dar errado
     vector<size_t> retorno;
     this->desvisitar_todos();
-    this->caminho_profundidade(retorno, noInicial);
+    this->caminho_profundidade(retorno, noInicial, retArestas);
     return retorno;
 }
 
-void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial){
+void Graph::caminho_profundidade(vector<size_t> &retorno, size_t noInicial, vector<Edge*>& retArestas){
     Node* no = search_for_node(noInicial);
     no->_visitado = true;
     retorno.push_back(no->_id);
     for(Edge* aresta = no->_first_edge; aresta != nullptr; aresta=aresta->_next_edge){
         Node* aux = search_for_node(aresta->_target_id);
         if (!aux->_visitado){
-            caminho_profundidade(retorno, aux->_id);
+            if(!aresta_no_vetor(retArestas, aresta))
+                retArestas.push_back(aresta);
+            caminho_profundidade(retorno, aux->_id, retArestas);
         }
     }
 }
@@ -828,4 +830,93 @@ Edge* Graph::getAresta(size_t no1, size_t no2){
         aresta = aresta->_next_edge;
     }
     return nullptr;
+}
+
+// void Graph::exportar(vector<Edge*> arestas, ofstream& arquivo_saida){
+//     // fazer uma lista de adjacência com as arestas
+
+//     vector<size_t> idNos;
+//     // pega os ids envolvidos nas arestas
+//     for(Edge* aresta : arestas){
+//         if(!ta_no_vetor(idNos, aresta->_source_id)){
+//             idNos.push_back(aresta->_source_id);
+//         }
+//         if(!ta_no_vetor(idNos, aresta->_target_id)){
+//             idNos.push_back(aresta->_target_id);
+//         }
+//     }
+//     // organiza os ids em ordem crescente pra ficar bonito fofo e organized
+//     sort(idNos.begin(), idNos.end(), [](size_t id1, size_t id2){return id1 < id2;});
+//     // aqui começa as verificações pra ver como vai fazer o .dot
+//     if(this->_directed){
+//         arquivo_saida << "digraph G {\n";
+//     } else {
+//         arquivo_saida << "graph G {\n";
+//     }
+//     for(size_t id : idNos){
+
+//         for(Edge* aresta : arestas){
+
+//             if(aresta->_source_id == id){
+//                 arquivo_saida << "\t" << id; // linha do nó do momento
+//                 if(this->_directed){
+//                     arquivo_saida << " -> " << aresta->_target_id << "[label=\"" << aresta->_weight << "\"];\n";
+//                     cout << " -> " << aresta->_target_id;
+//                 } else {
+//                     arquivo_saida << " -- " << aresta->_target_id << "[label=\"" << aresta->_weight << "\"];\n";
+//                     cout << " -- " << aresta->_target_id;
+//                 }
+
+//             }
+//             // if(aresta->_target_id == id){
+//             //     if(!this->_directed){
+//             //         arquivo_saida << " -- " << aresta->_source_id;
+//             //         cout << " -- " << aresta->_target_id;
+//             //     }
+//             // }
+
+//         }
+//     }
+//     arquivo_saida << "}";
+// }
+
+void Graph::exportar(vector<Edge*> arestas, ofstream& arquivo_saida){
+    // fazer uma lista de adjacência com as arestas
+
+    vector<size_t> idNos;
+    // pega os ids envolvidos nas arestas
+    for(Edge* aresta : arestas){
+        if(!ta_no_vetor(idNos, aresta->_source_id)){
+            idNos.push_back(aresta->_source_id);
+        }
+        if(!ta_no_vetor(idNos, aresta->_target_id)){
+            idNos.push_back(aresta->_target_id);
+        }
+    }
+    // organiza os ids em ordem crescente pra ficar bonito fofo e organized
+    sort(idNos.begin(), idNos.end(), [](size_t id1, size_t id2){return id1 < id2;});
+    // aqui começa as verificações pra ver como vai fazer o .dot
+    
+    for(size_t id : idNos){
+        arquivo_saida << endl << id; // linha do nó do momento
+        for(Edge* aresta : arestas){
+
+            if(aresta->_source_id == id){
+                if(this->_directed){
+                    arquivo_saida << " -> " << aresta->_target_id;
+                    cout << " -> " << aresta->_target_id;
+                } else {
+                    arquivo_saida << " -- " << aresta->_target_id;
+                    cout << " -- " << aresta->_target_id;
+                }   
+            }
+            // if(aresta->_target_id == id){
+            //     if(!this->_directed){
+            //         arquivo_saida << " -- " << aresta->_source_id;
+            //         cout << " -- " << aresta->_target_id;
+            //     }
+            // }
+
+        }
+    }
 }

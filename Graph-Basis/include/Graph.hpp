@@ -28,12 +28,12 @@ public:
     size_t floyd(size_t inicio, size_t destino);
     void calcularFloydTodo();//size_t inicial, size_t destino);
     pair<size_t,string> dijkstra(size_t orig, size_t dest);
-    vector<size_t> fecho_tran_direto(size_t node_id);
-    vector<size_t> fecho_tran_indireto(size_t node_id);
+    vector<size_t> fecho_tran_direto(size_t node_id, vector<Edge*>& retArestas);
+    vector<size_t> fecho_tran_indireto(size_t node_id, vector<Edge*>& retArestas);
     vector<Edge*> agmKruskal(vector<Edge*> arestas, size_t n);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
-    vector<size_t> arvore_caminho_profundidade(size_t noInicial);
-    void caminho_profundidade(vector<size_t> &retorno, size_t noInicial);
+    vector<size_t> arvore_caminho_profundidade(size_t noInicial, vector<Edge*>& retArestas);
+    void caminho_profundidade(vector<size_t> &retorno, size_t noInicial, vector<Edge*>& retArestas);
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
     void determinar_excentricidades();
     void determinar_raio();
@@ -61,7 +61,7 @@ public:
     bool getWeighted_edges();
     bool getWeighted_nodes();
     
-
+    void exportar(vector<Edge*> arestas, ofstream& arquivo_saida);
     void lista_adjacencia(ofstream& arquivo_saida);
     void printa_matriz_adj();
     
