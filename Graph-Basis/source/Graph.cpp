@@ -746,11 +746,12 @@ void Graph::desvisitar_todos(){
     }
 }
 
-void Graph::calcularFloydTodo(){//size_t inicial, size_t destino){
+pair<size_t,string> Graph::floyd(size_t inicio, size_t destino){//size_t inicial, size_t destino){
     
     size_t n = this->_number_of_nodes;
     // vector<Edge*> passou_por_onde;
     vector<vector<float>> matrizFloyd(n+1, vector<float>(n+1, infinito)); // cria matriz de tamanho n+1 e infinito em todo mundo
+    vector<vector<int>> next(n+1, vector<int>(n+1, -1)); // Matriz para reconstrução do caminho
     for (size_t i = 1; i <= n; i++) {
         matrizFloyd[i][i] = 0;
     }
@@ -761,53 +762,54 @@ void Graph::calcularFloydTodo(){//size_t inicial, size_t destino){
         while (edge) {
             size_t j = edge->_target_id;
             matrizFloyd[i][j] = edge->_weight;
+            next[i][j] = j;
+
             if (edge->_gemea) {
                 // nao direcionado
                 matrizFloyd[j][i] = edge->_weight;
+                next[j][i] = i;
+
             }
             edge = edge->_next_edge;
         }
     }
     // vector<Edge*> allArestas = this->allEdges();
-    this->matrizFloyd = matrizFloyd; // facilidade de acesso. provavelmente nao precisa 
     
-    for (size_t k = 1; k <= n; k++) {
-        for (size_t i = 1; i <= n; i++) {
-            for (size_t j = 1; j <= n; j++) {
-                if (this->matrizFloyd[i][k] < infinito && this->matrizFloyd[k][j] < infinito) {
-                    this->matrizFloyd[i][j] = min(this->matrizFloyd[i][j], this->matrizFloyd[i][k] + this->matrizFloyd[k][j]);
+       for (size_t k = 1; k <= n; k++) {
+            for (size_t i = 1; i <= n; i++) {
+                for (size_t j = 1; j <= n; j++) {
+                    if (matrizFloyd[i][k] < infinito && matrizFloyd[k][j] < infinito) {
+                        float newDist = matrizFloyd[i][k] + matrizFloyd[k][j];
+                        if (newDist < matrizFloyd[i][j]) {
+                            matrizFloyd[i][j] = newDist;
+                            next[i][j] = next[i][k];
+                        }
+                    }
                 }
             }
+        }auto getPath = [&](int i, int j) {
+       vector<int> path;
+            if (next[i][j] == -1) return path; // Se não há caminho
+            path.push_back(i);
+            while (i != j) {
+                i = next[i][j];
+                path.push_back(i);
+            } return path;
+        };  
+        string caminhoMenorCusto;
+                if (inicio != destino) {
+                    vector<int> path = getPath(inicio, destino);
+                    if (!path.empty()) {
+                        for (int node : path) {
+                 caminhoMenorCusto=caminhoMenorCusto+ (caminhoMenorCusto.empty() ? "" : " -> ")+to_string(node);
+                        }
+                    }
+              
         }
-    }
-}
-
-size_t Graph::floyd(size_t inicio, size_t destino) {
-    this->calcularFloydTodo();
-    // cout << "Custo mínimo de " << inicio << " até " << destino << " = " << this->matrizFloyd[inicio][destino];
-    // vector<Edge*> retorno;
-    // vector<size_t> vertices;
-    // size_t n = this->_number_of_nodes;
-    // exibição da matriz
-    // for (size_t i = 1; i <= n; i++) {
-    //     cout << i << "   ";
-    // }
-    // cout << endl;
-    // for (size_t i = 1; i <= n; i++) {
-    //     cout << i << "   ";
-    //     for (size_t j = 1; j <= n; j++) {
-    //         if (this->matrizFloyd[i][j] == infinito) {
-    //             cout << "INF   ";
-    //         } else {
-    //             cout << this->matrizFloyd[i][j] << "   ";
-    //         }
-    //     }
-    //     cout << endl;
-    // }
-    // return retorno;
-    return this->matrizFloyd[inicio][destino];
+            return {matrizFloyd[inicio][destino],caminhoMenorCusto};
     
 }
+
 
 vector<Edge*> Graph::allEdges(){
     vector<Edge*> retorno;

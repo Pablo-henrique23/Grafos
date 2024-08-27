@@ -25,8 +25,7 @@ public:
     void print_graph();
 
 
-    size_t floyd(size_t inicio, size_t destino);
-    void calcularFloydTodo();//size_t inicial, size_t destino);
+    pair<size_t,string> floyd(size_t inicio, size_t destino);
     pair<size_t,string> dijkstra(size_t orig, size_t dest);
     vector<size_t> fecho_tran_direto(size_t node_id);
     vector<size_t> fecho_tran_indireto(size_t node_id);
@@ -81,7 +80,6 @@ private:
     size_t raio;
     vector<size_t> centro;
     vector<size_t> periferia;
-    vector<vector<float>> matrizFloyd;
 };
 
 #endif  //GRAPH_HPP

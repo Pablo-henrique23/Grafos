@@ -206,8 +206,10 @@ int main(int argc, char* argv[]){
                     break;
                 }
                 cout << endl;
-                size_t resultado = grafo->floyd(inicio, destino);
-                cout << "Custo para ir de " << inicio << " até " << destino << ": " << resultado;
+                pair<size_t,string> resposta=grafo->floyd(inicio, destino);
+                size_t resultado = resposta.first;
+                cout << "Custo para ir de " << inicio << " ate " << destino << ": " << resultado<<endl;
+                cout<<"Caminho para ir de "<<inicio<<" ate "<<destino<<":"<<resposta.second;
                 cout << endl;
                 char salvar = 'w';
                 while(salvar != 's' && salvar != 'n'){
@@ -218,6 +220,7 @@ int main(int argc, char* argv[]){
                     cout << "Resultado salvo.\n";
                     arquivo_saida << "\n====== Caminho Mínimo (Floyd) de " << inicio << " até " << destino << " ======\n";
                     arquivo_saida << "Custo = " << resultado << endl;
+                    arquivo_saida<<"Caminho = "<< resposta.second<<endl;
                 } else if (salvar == 'n'){
                     cout << "Ok\n";
                 }
