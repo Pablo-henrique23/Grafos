@@ -295,16 +295,16 @@ int main(int argc, char* argv[]){
                     cout << salvar << endl;
                 }
                 if(salvar == 's'){
-                    // cout << "Salvando.\n";
-                    // size_t peso_total = 0;
-                    // arquivo_saida << "\n====== Árvore Geradora Mínima (Prim) ======\n";
+                    cout << "Salvando.\n";
+                    size_t peso_total = 0;
+                    arquivo_saida << "\n====== Árvore Geradora Mínima (Prim) ======\n";
+                    arquivo_saida << endl;
+                    for(Edge* i : resultado){
+                        arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
+                        peso_total += i->_weight;
+                    }
+                    arquivo_saida << "\nCusto total: " << peso_total << endl;
                     grafo->exportar(resultado, arquivo_saida);
-                    // arquivo_saida << endl;
-                    // for(Edge* i : resultado){
-                    //     arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
-                    //     peso_total += i->_weight;
-                    // }
-                    // arquivo_saida << "\nCusto total: " << peso_total << endl;
                 } else if(salvar == 'n') {
                     cout << "Ok\n";
                     break;
@@ -390,6 +390,7 @@ int main(int argc, char* argv[]){
                         peso_total += i->_weight;
                     }
                     arquivo_saida << "\nCusto total: " << peso_total << endl;
+                    grafo->exportar(arestas, arquivo_saida);
                 } else if(salvar == 'n') {
                     cout << "Ok\n";
                     break;
@@ -435,6 +436,7 @@ int main(int argc, char* argv[]){
                                 arquivo_saida << t << "\n" ;
                             }
                         }
+                        grafo->exportar(arestas, arquivo_saida);
                         break;
                     } else if (salvar == 'n'){
                         cout << "\nOk.";
@@ -499,7 +501,7 @@ int main(int argc, char* argv[]){
                             arquivo_saida << i << endl;
                         }
                     }
-
+                    grafo->exportar(grafo->allEdges(), arquivo_saida);
                 } else {
                     cout <<"\nOk";
                     break;
