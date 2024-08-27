@@ -95,8 +95,9 @@ int main(int argc, char* argv[]){
                     size_t id;
                     cin>>id;
                     vector<size_t> retorno;
+                    vector<Edge*> arestas;
                     if(cin){
-                        retorno = grafo->fecho_tran_direto(id);
+                        retorno = grafo->fecho_tran_direto(id, arestas);
                     }else{
                         cout<<"\nDigite um numero: ";
                     }
@@ -117,6 +118,7 @@ int main(int argc, char* argv[]){
                         } else {
                             arquivo_saida << "O fecho transitivo direto do nó " << id << " é vazio. \n";
                         }
+                        grafo->exportar(arestas, arquivo_saida);
                     } else if (salvar == 'n'){
                         cout <<"\nOk";
                     }
@@ -132,8 +134,9 @@ int main(int argc, char* argv[]){
                     size_t id;
                     cin>>id;
                     vector<size_t> retorno;
+                    vector<Edge*> arestas;
                     if(cin){
-                        retorno = grafo->fecho_tran_indireto(id);
+                        retorno = grafo->fecho_tran_indireto(id, arestas);
                     }else{
                         cout<<"\nDigite um numero: ";
                     }
@@ -154,6 +157,7 @@ int main(int argc, char* argv[]){
                         } else {
                             arquivo_saida << "O fecho transitivo indireto do nó " << id << " é vazio. \n";
                         }
+                        grafo->exportar(arestas, arquivo_saida);
                     } else if (salvar == 'n'){
                         cout <<"\nOk";
                     }
@@ -183,11 +187,12 @@ int main(int argc, char* argv[]){
                     cout << "\nSalvar resposta no arquivo de saída especificado? (s/n) ";
                     cin >> salvar;
                 }
-                if (salvar == 's'){
+                if (salvar == 's'){ 
                     cout << "Saída salva.\n";
                     arquivo_saida << "\n====== Caminho Mínimo (Algoritmo de Dijkstra) do nó " << origem << " até o nó " << destino << " ======\n";
                     arquivo_saida << "Dijkstra: "<<resposta.second<<endl;
                     arquivo_saida << "Custo: "<<resposta.first<<endl;
+                    arquivo_saida << "\n" << resposta.second << endl;
                 } else if (salvar == 'n'){
                     cout <<"\nOk";
                     break;
@@ -297,11 +302,13 @@ int main(int argc, char* argv[]){
                     cout << "Salvando.\n";
                     size_t peso_total = 0;
                     arquivo_saida << "\n====== Árvore Geradora Mínima (Prim) ======\n";
+                    arquivo_saida << endl;
                     for(Edge* i : resultado){
                         arquivo_saida << "(" << i->_source_id << ", " << i->_target_id << ") ";
                         peso_total += i->_weight;
                     }
                     arquivo_saida << "\nCusto total: " << peso_total << endl;
+                    grafo->exportar(resultado, arquivo_saida);
                 } else if(salvar == 'n') {
                     cout << "Ok\n";
                     break;
@@ -387,6 +394,7 @@ int main(int argc, char* argv[]){
                         peso_total += i->_weight;
                     }
                     arquivo_saida << "\nCusto total: " << peso_total << endl;
+                    grafo->exportar(arestas, arquivo_saida);
                 } else if(salvar == 'n') {
                     cout << "Ok\n";
                     break;
@@ -407,7 +415,8 @@ int main(int argc, char* argv[]){
                         break;
                     }
                 }
-                vector<size_t> resultado = grafo->arvore_caminho_profundidade(v);
+                vector<Edge*> arestas;
+                vector<size_t> resultado = grafo->arvore_caminho_profundidade(v, arestas);
                 size_t ultimo = resultado.back();
                 for (size_t t : resultado){
                     if(t != ultimo){
@@ -431,6 +440,7 @@ int main(int argc, char* argv[]){
                                 arquivo_saida << t << "\n" ;
                             }
                         }
+                        grafo->exportar(arestas, arquivo_saida);
                         break;
                     } else if (salvar == 'n'){
                         cout << "\nOk.";
@@ -495,7 +505,7 @@ int main(int argc, char* argv[]){
                             arquivo_saida << i << endl;
                         }
                     }
-
+                    grafo->exportar(grafo->allEdges(), arquivo_saida);
                 } else {
                     cout <<"\nOk";
                     break;
@@ -508,7 +518,7 @@ int main(int argc, char* argv[]){
             }
             case 99:
             {
-                grafo->lista_adjacencia(arquivo_saida);
+                grafo->exportar(grafo->allEdges(), arquivo_saida);
                 cout << "Salvando lista no arquivo de saída fornecido\n";
                 break;
             }

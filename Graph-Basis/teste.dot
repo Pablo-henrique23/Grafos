@@ -1,0 +1,26 @@
+
+====== Árvore Geradora Mínima (Kruskal) ======
+(1, 2) (2, 3) 
+Custo total: 5
+
+1 -> 2 -> 3
+2 -> 1 -> 3
+
+====== Árvore Geradora Mínima (Kruskal) ======
+(1, 2) (2, 3) (3, 4) (4, 5) 
+Custo total: 16
+
+1 -> 2 -> 3
+2 -> 1 -> 3
+3 -> 1 -> 2 -> 4
+4 -> 3 -> 5
+5 -> 4
+====== Árvore Geradora Mínima (Kruskal) ======
+(1, 2) (2, 3) (3, 4) (4, 5) 
+Custo total: 16
+
+1 -> 2 -> 3
+2 -> 1 -> 3
+3 -> 1 -> 2 -> 4
+4 -> 3 -> 5
+5 -> 4
