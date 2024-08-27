@@ -835,7 +835,7 @@ Edge* Graph::getAresta(size_t no1, size_t no2){
 }
 
 /* 
-LEIA-ME (com voz grossa)!! Óh grande mestre Luciana, esta função abaixo foi dedicada a te possibilitar exportar um
+LEIA-ME!! Luciana, esta função abaixo foi dedicada a te possibilitar exportar um
 grafo para o GraphViz. Entretanto! Optamos por nos manter teoricamente corretos quanto ao formato de uma lista de 
 adjacência, visto que o formato que o GraphViz entende iria requerer uma alteração grande no conceito da lista de adj.
 Visto isso, descomente essa função caso ache necessário exportar para o GraphViz. Também peço humildemente para que saiba 
