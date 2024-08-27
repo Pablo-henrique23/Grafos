@@ -832,6 +832,15 @@ Edge* Graph::getAresta(size_t no1, size_t no2){
     return nullptr;
 }
 
+/* 
+LEIA-ME (com voz grossa)!! Óh grande mestre Luciana, esta função abaixo foi dedicada a te possibilitar exportar um
+grafo para o GraphViz. Entretanto! Optamos por nos manter teoricamente corretos quanto ao formato de uma lista de 
+adjacência, visto que o formato que o GraphViz entende iria requerer uma alteração grande no conceito da lista de adj.
+Visto isso, descomente essa função caso ache necessário exportar para o GraphViz. Também peço humildemente para que saiba 
+que esta função não está sendo usada em todos os cases, dada a nossa escolha acima. 
+Assim, podem aparecer alguns empecilhos no caminho e, nesse caso, peço que use da nossa ajuda.
+Para que saiba, a função que está sendo usada na main é a exportar() que vem logo após essa.
+*/
 // void Graph::exportar(vector<Edge*> arestas, ofstream& arquivo_saida){
 //     // fazer uma lista de adjacência com as arestas
 
@@ -902,20 +911,15 @@ void Graph::exportar(vector<Edge*> arestas, ofstream& arquivo_saida){
         for(Edge* aresta : arestas){
 
             if(aresta->_source_id == id){
-                if(this->_directed){
-                    arquivo_saida << " -> " << aresta->_target_id;
-                    cout << " -> " << aresta->_target_id;
-                } else {
-                    arquivo_saida << " -- " << aresta->_target_id;
-                    cout << " -- " << aresta->_target_id;
-                }   
+                arquivo_saida << " -> " << aresta->_target_id;
+                // if(this->_directed){
+                //     arquivo_saida << " -> " << aresta->_target_id;
+                //     // cout << " -> " << aresta->_target_id;
+                // } else {
+                //     arquivo_saida << " -- " << aresta->_target_id;
+                //     // cout << " -- " << aresta->_target_id;
+                // }   
             }
-            // if(aresta->_target_id == id){
-            //     if(!this->_directed){
-            //         arquivo_saida << " -- " << aresta->_source_id;
-            //         cout << " -- " << aresta->_target_id;
-            //     }
-            // }
 
         }
     }
