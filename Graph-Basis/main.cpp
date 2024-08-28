@@ -273,11 +273,12 @@ int main(int argc, char* argv[]){
                     } else {
                         if (v == 65536){
                             vertices.clear();
-                            for(Node* noI = grafo->getFirst(); noI!=nullptr; noI = noI->_next_node){
+                            Node* noI;
+                            for( noI = grafo->getFirst(); noI!=nullptr; noI = noI->_next_node){
                                 vertices.push_back(noI->_id);
                             }
-                            arestas = grafo->gerarVerticeInduzido(vertices);
-                            resultado = grafo->agmPrim(arestas, grafo->getNumberOfNodes());
+                             arestas = grafo->gerarVerticeInduzido(vertices);
+                            resultado = grafo->agmPrim(arestas,  vertices.size());
                             running = false;
                         } else {
                             if(grafo->ta_no_vetor(vertices,v)){

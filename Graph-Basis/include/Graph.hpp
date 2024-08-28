@@ -46,7 +46,7 @@ public:
     bool ta_no_vetor(vector<size_t>& vetor, size_t node_id);
     bool node_no_vetor(vector<Node*>& vetor, Node* node);
     bool aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta);
- 
+    bool NoNoVetor(vector<int> nos, int id);
     vector<Edge*> allEdges();
     Edge* getAresta(size_t no1, size_t no2);
     unordered_map<size_t, size_t> getExcentricidades();

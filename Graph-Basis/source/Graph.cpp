@@ -457,12 +457,8 @@ bool Graph::node_no_vetor(vector<Node*>& vetor, Node* node){
     return false;
 }
 bool Graph::aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta){
-    for (size_t i = 0; i < vetor.size(); i++){
-        if(vetor[i]==aresta){
-            return true;
-        }
-    }
-    return false;
+       return find(vetor.begin(), vetor.end(), aresta) != vetor.end();
+
 }
 
 bool Graph::getDirected(){
@@ -512,99 +508,106 @@ vector<Edge*> Graph::gerarVerticeInduzido(vector<size_t> vertices){
 vector<Edge*> Graph::agmPrim(vector<Edge*> arestas, size_t nNos){
 // LEMBRETE: a intenção era fazer um array com as arestas disponíveis (arestas disponíveis = arestas ligadas aos vertices
 // que ja foram inseridos) e iterar sobre ela pra achar a proxima a ser adicionada
-    vector<Edge*> retorno;
-    vector<Node*> nos_disponiveis;
-    vector<Edge*> arestas_disponiveis;
+      vector<Edge*> arvoreGeradoraMinima;
+    vector<int> visitados;
+    vector<Edge*> FilaArestas;
     size_t peso_total = 0;
-    this->desvisitar_todos();
-    sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
-    retorno.push_back(arestas[0]); // pega a de menor peso
 
-    Node* noinicial = search_for_node(arestas[0]->_source_id);
-    Node* targetInicial = search_for_node(arestas[0]->_target_id);
-    nos_disponiveis.push_back(noinicial);
-    nos_disponiveis.push_back(targetInicial);
-    noinicial->_visitado = true; // visita
-    targetInicial->_visitado = true;
-    peso_total += arestas[0]->_weight;
-
-    for(Edge* aresta = noinicial->_first_edge; aresta != nullptr; aresta = aresta->_next_edge){
-        arestas_disponiveis.push_back(aresta);
-    } // coloca as arestas nos disponiveis
+    // Inicialização: escolha um nó inicial
+    Edge* inicial = arestas[0];
+    visitados.push_back(inicial->_source_id);
     
-    sort(arestas_disponiveis.begin(), arestas_disponiveis.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
+    // Adiciona todas as arestas conectadas ao nó inicial
+    for (Edge* e = inicial; e != nullptr; e = e->_next_edge) {
+        FilaArestas.push_back(e);
+    }
+    
+    while (visitados.size() < nNos) {
+        // Ordena as arestas por peso
+        sort(FilaArestas.begin(), FilaArestas.end(), [](Edge* e1, Edge* e2) {
+            return e1->_weight < e2->_weight;
+        });
 
-    while(retorno.size() < nNos -1){
-        for(Edge* aresta : arestas_disponiveis){
-            if(!aresta_no_vetor(retorno, aresta)){
-                Node* fonte = search_for_node(aresta->_source_id);
-                Node* target = search_for_node(aresta->_target_id);
-                if(fonte->_visitado && !target->_visitado){
-                    target->_visitado = true;
-                    nos_disponiveis.push_back(target);
-                    retorno.push_back(aresta);
-                    peso_total += aresta->_weight;
-                }
-                if(!fonte->_visitado && target->_visitado){
-                    fonte->_visitado = true;
-                    nos_disponiveis.push_back(fonte);
-                    retorno.push_back(aresta);
-                    peso_total += aresta->_weight;
-                }
+        // Remove a aresta de menor peso
+        Edge* minEdge = FilaArestas.front();
+        FilaArestas.erase(FilaArestas.begin());
+
+        if (NoNoVetor(visitados, minEdge->_source_id) && NoNoVetor(visitados, minEdge->_target_id)) {
+            continue; // Ambos os nós já foram visitados
+        }
+
+        // Adiciona a aresta à árvore geradora mínima
+        arvoreGeradoraMinima.push_back(minEdge);
+        peso_total += minEdge->_weight;
+
+        // Adiciona o nó não visitado
+        int novoNo = NoNoVetor(visitados, minEdge->_source_id) ? minEdge->_target_id : minEdge->_source_id;
+        visitados.push_back(novoNo);
+
+        // Adiciona todas as arestas conectadas ao novo nó à fila de arestas
+        for (Edge* e = search_for_node(novoNo)->_first_edge; e != nullptr; e = e->_next_edge) {
+            if (!NoNoVetor(visitados, e->_source_id) || !NoNoVetor(visitados, e->_target_id)) {
+                FilaArestas.push_back(e);
             }
         }
-        arestas_disponiveis.clear(); // refaz as arestas disponíveis
-        for(Node* no : nos_disponiveis){
-            for(Edge* a = no->_first_edge; a != nullptr; a = a->_next_edge){
-                arestas_disponiveis.push_back(a);
-            }
+    }
+
+    // Exibe a árvore geradora mínima
+    cout << "Árvore Geradora Mínima:" << endl;
+    for ( Edge* e : arvoreGeradoraMinima) {
+        cout << "(" << e->_source_id << " - " << e->_target_id << ") Peso: " << e->_weight << endl;
+    }
+    cout << "Peso Total: " << peso_total << endl;
+
+    return arvoreGeradoraMinima;
+
+    
+}
+bool Graph::NoNoVetor(vector<int> nos, int id){
+    for(int i =0;i<nos.size();i++){
+        if(nos[i]==id){
+            return true;
         }
-        sort(arestas_disponiveis.begin(), arestas_disponiveis.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;});
-    }
-
-
-
-    cout << endl;
-    // sort(retorno.begin(), retorno.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_source_id < aresta2->_source_id;});
-    cout << "Árvore Geradora Mínima composta pelas arestas\n";
-    for(Edge* i : retorno){
-        cout << "(" << i->_source_id << ", " << i->_target_id << ") ";
-    }
-    cout << endl;
-    cout << "Custo total: " << peso_total << endl;
-    this->desvisitar_todos();
-    return retorno;
+    }return false;
 }
 
 
 vector<Edge*> Graph::agmKruskal(vector<Edge*> arestas, size_t n){
     // bota em ordem por peso
-    sort(arestas.begin(), arestas.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_weight < aresta2->_weight;}); 
-    vector<Edge*> retorno; // arestas que serão retornadas
+     // Ordena as arestas por peso
+    sort(arestas.begin(), arestas.end(), [](Edge* a1, Edge* a2) {
+        return a1->_weight < a2->_weight;
+    });
+
+    vector<Edge*> retorno; // Arestas que serão retornadas
     size_t peso_total = 0;
     Conjunto conj(n);
 
-    for(Edge* aresta : arestas){
-        if(aresta->_gemea){ // pula as gemeas, ninguem quer saber delas
+    for (Edge* aresta : arestas) {
+        if (aresta->_gemea) {
+            // Pular arestas gêmeas
             continue;
         }
-        if(conj.find(aresta->_source_id) != conj.find(aresta->_target_id)){
+        // Verifica se a aresta cria um ciclo
+        if (conj.find(aresta->_source_id) != conj.find(aresta->_target_id)) {
             conj.unite(aresta->_source_id, aresta->_target_id);
             retorno.push_back(aresta);
             peso_total += aresta->_weight;
         }
     }
 
-    // mostra o retorno, pode tirar se quiser 
-    cout << endl;
+    // Ordena as arestas no retorno por ID da fonte
+    sort(retorno.begin(), retorno.end(), [](Edge* a1, Edge* a2) {
+        return a1->_source_id < a2->_source_id;
+    });
 
-    // coloca em ordem
-    sort(retorno.begin(), retorno.end(), [](Edge *aresta1, Edge *aresta2){return aresta1->_source_id < aresta2->_source_id;});
+    // Exibe o resultado
     cout << "Árvore Geradora Mínima composta pelas arestas\n";
-    for (Edge* i : retorno){
+    for (Edge* i : retorno) {
         cout << "(" << i->_source_id << ", " << i->_target_id << ") ";
     }
     cout << "\nCusto total: " << peso_total << endl;
+
     return retorno;
 }
 
