@@ -21,7 +21,8 @@ int menu() {
         cout << "[6] Arvore Geradora Mínima de subgrafo vertice-induzido - Kruskal" << endl; // ok 
         cout << "[7] Arvore dada pela ordem do caminhamento em profundidade a partir de um vertice" << endl; // ok
         cout << "[8] Raio, centro, diametro e periferia do grafo" << endl; // ok
-        cout << "[9] Conjunto de vertices de articulacao" << endl; // conferir 
+        cout << "[9] Conjunto de vertices de articulacao" << endl; // ok
+	cout << "[99] Salvar lista de adjacência do grafo no arquivo de saída" << endl; 
         cout << "[0] Sair" << endl;
         cout << "Escolha: ";
         cin >> selecao;
