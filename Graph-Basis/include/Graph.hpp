@@ -25,15 +25,14 @@ public:
     void print_graph();
 
 
-    size_t floyd(size_t inicio, size_t destino);
-    void calcularFloydTodo();//size_t inicial, size_t destino);
+    pair<size_t,string> floyd(size_t inicio, size_t destino);
     pair<size_t,string> dijkstra(size_t orig, size_t dest);
-    vector<size_t> fecho_tran_direto(size_t node_id);
-    vector<size_t> fecho_tran_indireto(size_t node_id);
+    vector<size_t> fecho_tran_direto(size_t node_id, vector<Edge*>& retArestas);
+    vector<size_t> fecho_tran_indireto(size_t node_id, vector<Edge*>& retArestas);
     vector<Edge*> agmKruskal(vector<Edge*> arestas, size_t n);
     vector<Edge*> agmPrim(vector<Edge*> arestas, size_t nNos);
-    vector<size_t> arvore_caminho_profundidade(size_t noInicial);
-    void caminho_profundidade(vector<size_t> &retorno, size_t noInicial);
+    vector<size_t> arvore_caminho_profundidade(size_t noInicial, vector<Edge*>& retArestas);
+    void caminho_profundidade(vector<size_t> &retorno, size_t noInicial, vector<Edge*>& retArestas);
     vector<Edge*> gerarVerticeInduzido(vector<size_t> vertices);
     void determinar_excentricidades();
     void determinar_raio();
@@ -47,7 +46,7 @@ public:
     bool ta_no_vetor(vector<size_t>& vetor, size_t node_id);
     bool node_no_vetor(vector<Node*>& vetor, Node* node);
     bool aresta_no_vetor(vector<Edge*>& vetor, Edge* aresta);
- 
+    bool NoNoVetor(vector<int> nos, int id);
     vector<Edge*> allEdges();
     Edge* getAresta(size_t no1, size_t no2);
     unordered_map<size_t, size_t> getExcentricidades();
@@ -60,8 +59,13 @@ public:
     size_t getNumberOfNodes();
     bool getWeighted_edges();
     bool getWeighted_nodes();
+    int getGrauNo(size_t node_id);
+    vector<size_t> getPontosArticulacaoNaoDirecionado();
+    void caminho_prof_pontos_artc_nao_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time);
+    vector<size_t> getPontosArticulacaoDirecionados();
+    void caminho_prof_pontos_art_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time);
     
-
+    void exportar(vector<Edge*> arestas, ofstream& arquivo_saida);
     void lista_adjacencia(ofstream& arquivo_saida);
     void printa_matriz_adj();
     
@@ -81,7 +85,6 @@ private:
     size_t raio;
     vector<size_t> centro;
     vector<size_t> periferia;
-    vector<vector<float>> matrizFloyd;
 };
 
 #endif  //GRAPH_HPP
