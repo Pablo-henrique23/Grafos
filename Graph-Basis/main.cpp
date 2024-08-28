@@ -226,7 +226,7 @@ int main(int argc, char* argv[]){
                     arquivo_saida << "\n====== Caminho Mínimo (Floyd) de " << inicio << " até " << destino << " ======\n";
                     arquivo_saida << "Custo = " << resultado << endl;
                     arquivo_saida<<"Caminho = "<< resposta.second<<endl;
-		    arquivo_saida << endl << resposta.second;
+		            arquivo_saida << endl << resposta.second;
                 } else if (salvar == 'n'){
                     cout << "Ok\n";
                 }
@@ -516,6 +516,35 @@ int main(int argc, char* argv[]){
             }
             case 9:
             {
+                vector<size_t> pontos_articulados;
+                if(grafo->getDirected()){
+                    pontos_articulados = grafo->getPontosArticulacaoDirecionados();
+                } else {
+                    pontos_articulados = grafo->getPontosArticulacaoNaoDirecionado();
+                }
+                cout << "Pontos de Articulação: ";
+                for (size_t point : pontos_articulados) {
+                    cout << point << " ";
+                }
+                cout << endl;
+
+                char salvar = 'w';
+                while (salvar != 's' && salvar != 'n'){
+                    cout << "\n\nSalvar resposta no arquivo de saída especificado? (s/n) ";
+                    cin >> salvar;
+                }
+                if (salvar == 's'){
+                    cout << "Saída salva.\n";
+                    arquivo_saida << "\n====== Pontos de Articulação" << " ======\n";
+                    for (size_t point : pontos_articulados) {
+                        arquivo_saida << point << " ";
+                    }
+                    arquivo_saida << endl;
+                    grafo->exportar(grafo->allEdges(), arquivo_saida);
+                } else {
+                    cout <<"\nOk";
+                    break;
+                }
                 break;
             }
             case 99:

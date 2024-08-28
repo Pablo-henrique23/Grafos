@@ -732,19 +732,6 @@ void Graph::lista_adjacencia(ofstream& arquivo_saida){ // printa a lista de adj 
     }
 }
 
-void Graph::printa_matriz_adj(){
-    for (size_t i = 1; i <= this->_number_of_nodes; i++){
-        cout << "\t" << i;
-    }
-    cout << endl;
-    for (size_t i = 1; i <= this->_number_of_nodes; i++){
-        cout << "\n" << i;
-        for (size_t j = 1; j <= this->_number_of_nodes; j++){
-            cout << "\t" << this->matriz_adj[i][j];
-        }
-    }
-}
-
 void Graph::desvisitar_todos(){
     for(Node* no = this->_first; no!=nullptr; no = no->_next_node){
         no->_visitado = false;
@@ -926,6 +913,118 @@ void Graph::exportar(vector<Edge*> arestas, ofstream& arquivo_saida){
                 // }   
             }
 
+        }
+    }
+}
+
+
+int Graph::getGrauNo(size_t node_id) {
+    int grau = 0;
+    for (Edge* aresta = search_for_node(node_id)->_first_edge; aresta != nullptr; aresta = aresta->_next_edge) {
+        grau++;
+    }
+    return grau;
+}
+
+void Graph::caminho_prof_pontos_artc_nao_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, vector<bool>& is_in_stack, stack<size_t>& stk, int& time) {
+    Node* node = search_for_node(node_id);
+    visited[node_id] = true;
+    is_in_stack[node_id] = true;
+    stk.push(node_id);
+
+    discovery[node_id] = low[node_id] = ++time;
+    int filhos = 0;
+
+    for (Edge* aresta = node->_first_edge; aresta != nullptr; aresta = aresta->_next_edge) {
+        size_t vizinho_id = aresta->_target_id;
+
+        if (!visited[vizinho_id]) {
+            filhos++;
+            caminho_prof_pontos_artc_nao_direcionado(vizinho_id, node_id, pontos_articulacao, discovery, low, visited, is_in_stack, stk, time);
+
+            // Atualiza o valor de low[node_id] com o menor valor alcançável a partir do vizinho
+            low[node_id] = min(low[node_id], low[vizinho_id]);
+
+            // Para grafos não direcionados e direcionados
+            if ((parent_id == node_id && filhos > 1) || 
+                (parent_id != node_id && low[vizinho_id] >= discovery[node_id])) {
+                pontos_articulacao.push_back(node_id);
+            }
+
+        } else if (is_in_stack[vizinho_id] && vizinho_id != parent_id) {
+            // Atualiza low[node_id] para considerar a aresta de retorno
+            low[node_id] = min(low[node_id], discovery[vizinho_id]);
+        }
+    }
+}
+
+vector<size_t> Graph::getPontosArticulacaoNaoDirecionado() {
+    vector<size_t> articulation_points;
+    vector<int> discovery(this->_number_of_nodes + 1, -1);
+    vector<int> low(this->_number_of_nodes + 1, -1);
+    vector<bool> visited(this->_number_of_nodes + 1, false);
+    vector<bool> is_in_stack(this->_number_of_nodes + 1, false);
+    stack<size_t> stk;
+    int time = 0;
+
+    for (size_t i = 1; i <= this->_number_of_nodes; i++) {
+        if (!visited[i]) {
+            caminho_prof_pontos_artc_nao_direcionado(i, i, articulation_points, discovery, low, visited, is_in_stack, stk, time);
+        }
+    }
+
+    sort(articulation_points.begin(), articulation_points.end());
+
+    return articulation_points;
+}
+
+vector<size_t> Graph::getPontosArticulacaoDirecionados() {
+    int time = 0;
+    vector<int> discovery(_number_of_nodes, -1);
+    vector<int> low(_number_of_nodes, -1);
+    vector<bool> visited(_number_of_nodes, false);
+    vector<size_t> pontos_articulacao;
+
+    for (size_t i = 1; i <= _number_of_nodes; i++) {
+        if (!visited[i]) {
+            caminho_prof_pontos_art_direcionado(i, -1, pontos_articulacao, discovery, low, visited, time);
+        }
+    }
+
+    // Remover duplicatas, se houver, e imprimir os pontos de articulação
+    sort(pontos_articulacao.begin(), pontos_articulacao.end());
+    pontos_articulacao.erase(unique(pontos_articulacao.begin(), pontos_articulacao.end()), pontos_articulacao.end());
+
+    return pontos_articulacao;
+}
+
+void Graph::caminho_prof_pontos_art_direcionado(size_t node_id, size_t parent_id, vector<size_t>& pontos_articulacao, vector<int>& discovery, vector<int>& low, vector<bool>& visited, int& time) {
+    visited[node_id] = true;
+    discovery[node_id] = low[node_id] = ++time;
+    int children = 0;
+
+    for (Edge* aresta = search_for_node(node_id)->_first_edge; aresta != nullptr; aresta = aresta->_next_edge) {
+        size_t vizinho_id = aresta->_target_id;
+
+        if (!visited[vizinho_id]) {
+            children++;
+            caminho_prof_pontos_art_direcionado(vizinho_id, node_id, pontos_articulacao, discovery, low, visited, time);
+
+            // Atualiza low[node_id] considerando o menor valor alcançável
+            low[node_id] = min(low[node_id], low[vizinho_id]);
+
+            // Condição de ponto de articulação em grafos direcionados
+            if (parent_id != -1 && low[vizinho_id] >= discovery[node_id]) {
+                if (getGrauNo(parent_id) != 2) { // Verifica se o grau do nó anterior é 2
+                    pontos_articulacao.push_back(node_id);
+                }
+            }
+
+            if (parent_id == -1 && children > 1) {
+                pontos_articulacao.push_back(node_id);
+            }
+        } else if (vizinho_id != parent_id) {
+            low[node_id] = min(low[node_id], discovery[vizinho_id]);
         }
     }
 }
