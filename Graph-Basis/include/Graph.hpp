@@ -68,7 +68,8 @@ public:
     void exportar(vector<Edge*> arestas, ofstream& arquivo_saida);
     void lista_adjacencia(ofstream& arquivo_saida);
     void printa_matriz_adj();
-    
+    void AlgoritmoGuloso();
+    bool isAdjacent(size_t first_id,size_t second_id);
 
 private:
     size_t _number_of_nodes;

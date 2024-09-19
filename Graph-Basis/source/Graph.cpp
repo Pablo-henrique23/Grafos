@@ -15,12 +15,13 @@ using namespace std;
 Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes){
     // Pega a primeira linha e joga pra tamanhoInstância (a 1° linha é o tamanho da instancia do grafo, check README.txt)
     // cout << "Inicio do construtor\n";
-    string temp; // temporario pra ser usado na função getline()
-    getline(instance, temp);
+    string name; // temporario pra ser usado na função getline()
+    getline(instance, name);
+    cout<<"name"<<name;
     // pega o tamanho da instancia em inteiro
-    this->_number_of_nodes = stoi(temp); // stoi = string to int
+   // this->_number_of_nodes = stoi(temp); // stoi = string to int
     
-    adj.resize(this->_number_of_nodes+1);
+    //adj.resize(this->_number_of_nodes+1);
     this->_directed = direcionado;
     this->_weighted_edges = weighted_edges;
     this->_weighted_nodes = weighted_nodes;
@@ -28,56 +29,159 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     // ANALISE DE ARQUIVO DE ENTRADA
     _first=nullptr;
     string linha;
-    Node no;
-    Node proximoNo;
-    Edge aresta;
+    size_t numeroSubGrafos;
+    string vertices;
+    string pesosVertices;
+    string arestasConectados;
     this->_number_of_edges = 0;
     this->_number_of_nodes = 0;
+    bool parametroNumeroDeVerticesEncontrados=false;
+    bool parametroPesosVertices=false;
+    bool parametroArestaConectado = false;
     // Deus nos ajude com stringstream
-    // cout << "Começando a ler arquivo.\n";
+     cout << "Começando a ler arquivo.\n";
     while (getline(instance, linha)){ // le cada linha
         stringstream ss(linha);
-        int contador = 0;
-        for (char i : linha){ // para cada caractere na linha (\n nao é armazenado)
-            if (i == ' '){
-                continue;
-            } // ignora espaços
-            if (contador == 0){ // le o id do no de onde a aresta sai
-                ss >> no._id;
-                add_node(no._id);
-                contador++;
-                
-            } else if (contador == 1){ // le o id do no pra onde a aresta vai
-                ss >> proximoNo._id;
-                add_node(proximoNo._id);
-                contador++;
-                
+        if(linha.find("param p :=")!=string::npos){
+            size_t posicaoParametro =linha.find("=")+1;
+            size_t tamanho = linha.find(';')-posicaoParametro;
+            numeroSubGrafos = stoi(linha.substr(posicaoParametro,tamanho));
+        }
+        else if(linha.find("set V := ")!=string::npos)
+        {
+            parametroNumeroDeVerticesEncontrados = true;
+            continue;
+        }
+        else if(linha.find("param w := ")!=string::npos)
+        {
+        parametroPesosVertices=true;
+        continue;
+        }
+        else if(linha.find("set E := ")!=string::npos)
+        {
+        parametroArestaConectado = true;
+        continue;
+        }
+        if(parametroNumeroDeVerticesEncontrados)
+        {
+            if(linha.find(";")!=string::npos){
+            parametroNumeroDeVerticesEncontrados = false;
             }
-            
-            if (contador == 2){ // se for 2, ta lendo aresta. sempre vai chegar no 2, ja que o contador é aumentado dentro dos if
-                if (!weighted_edges){
-                    aresta._weight = 1;
-                } else {
-                    ss >> aresta._weight;
-                    if(aresta._weight == 0){
-                        aresta._weight = 1;
+            else
+            {
+            vertices+=linha;
+            }
+        }
+        if(parametroPesosVertices){
+            if(linha.find(";")!=string::npos){
+            parametroPesosVertices = false;
+            }else{
+                cout<<"vertice:"<<linha.substr(0,3)<<" de peso: "<<linha.substr(5,3)<<endl;
+                add_node(stoi(linha.substr(0,3)),stoi(linha.substr(5,3)));
+            pesosVertices+=linha+"\n";
+            }
+        }
+        if(parametroArestaConectado){
+            if(linha.find(";")!=string::npos){
+            parametroArestaConectado = false;
+            }else{
+                string primeiroVertice="";
+                size_t idPrimeiroNo;
+                string segundoVertice="";
+                size_t idSegundoNo;
+                bool inicioPrimeiroCaracter=false;
+                bool inicioSegundoCaracter = false;
+                //arestasConectados +=linha;
+                  for (char i : linha){
+                    if (i == '('){
+                        inicioPrimeiroCaracter = true;
+                        continue;
                     }
-                }
-                add_edge(no._id, proximoNo._id, aresta._weight, false);
-                if (!direcionado){
-                    add_edge(proximoNo._id, no._id, aresta._weight, true);
-                }
-                contador++;
+                    else if(i==','){
+                        inicioPrimeiroCaracter = false;
+                        idPrimeiroNo = stoi(primeiroVertice);
+                        primeiroVertice="";
+                        inicioSegundoCaracter = true;
+                        cout<<"Primeiro caracter"<<idPrimeiroNo;
+                        continue;
+                    }else if(i==')'){
+                        inicioSegundoCaracter = false;
+                        idSegundoNo = stoi(segundoVertice);
+                        segundoVertice = "";
+                        cout<<"Segundo caracter"<<idSegundoNo<<endl;
+                        add_edge(idPrimeiroNo,idSegundoNo);
+                        add_edge(idSegundoNo,idPrimeiroNo);
+                        continue;
+                    }
+                    if(inicioPrimeiroCaracter){
+                        primeiroVertice+=i;
+                    }
+                    if(inicioSegundoCaracter){
+                        segundoVertice+=i;
+                    }
+            }
             }
         }
     }
-    // cout << "Terminou de ler \n";
+     cout<<"Numero de subgrafos: "<<numeroSubGrafos<<endl;
+    cout<<"vertices"<<vertices<<endl;
+    //cout<<"Pesos dos vertices"<<pesosVertices<<endl;
+    cout<<"Arestas Conectadas"<<arestasConectados<<endl;
+     cout << "Terminou de ler \n";
     this->raio = infinito;
     this->diametro = 0;
-    // print_graph();
+     print_graph();
     
 }
+void Graph::AlgoritmoGuloso()
+{
+     vector<Edge> X;  // Conjunto X de arestas
+    set<size_t> coveredVertices; // Vértices cobertos por X
+    int p = 3; 
+    Edge* e= new Edge();
+    while(e->_next_edge!=nullptr){
 
+     
+    if(X.size()>p){break;}
+    for (int coveredVertice:coveredVertices)
+    {
+        /* code */
+    if(!isAdjacent(e->_source_id,coveredVertice)){
+        X.push_back(*e);
+        coveredVertices.insert(e->_source_id);
+        coveredVertices.insert(e->_target_id);
+    
+    }
+    }
+    
+    }
+    while(coveredVertices.size()<this->_number_of_nodes){
+        
+    }
+
+    
+}
+size_t gap(size_t weightOne,size_t weightTwo){
+    if(weightOne>=weightTwo){
+        return weightOne-weightTwo;
+    }
+    return weightTwo-weightOne;
+
+}
+bool Graph::isAdjacent(size_t first_id,size_t second_id){
+ Node* firstNode = search_for_node(first_id);
+ Edge* edgeTraversal = firstNode->_first_edge;
+while(edgeTraversal!=nullptr){
+            if(edgeTraversal->_target_id==second_id){
+                return true;
+            }
+           edgeTraversal=edgeTraversal->_next_edge;
+        }
+        return false;
+}
+bool hasUncoveredVertices(){
+    return true;
+}
 Graph::Graph()
 {
 }
@@ -211,6 +315,7 @@ void Graph::add_node(size_t node_id, float weight)
         _first = firstNode;
         _first->_id = node_id;
         firstNode->_visitado = false;
+        firstNode->_weight=weight;
         this->_number_of_nodes++;
     }else{
         Node* aux=_first;
@@ -232,6 +337,7 @@ void Graph::add_node(size_t node_id, float weight)
         aux->_next_node->_id = node_id;
         this->_last = aux->_next_node;
         aux->_next_node->_visitado = false;
+        aux->_next_node->_weight=weight;
         this->_number_of_nodes++;
     }
 }
@@ -239,7 +345,7 @@ void Graph::add_node(size_t node_id, float weight)
 void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool _gemea){  
     Node* No1;
     Node* traversal=this->_first;
-    adj[node_id_1].push_back(make_pair(node_id_2, weight));
+    //adj[node_id_1].push_back(make_pair(node_id_2, weight));
     while(traversal!=nullptr){
         if(node_id_1==traversal->_id){
             No1 = traversal;
