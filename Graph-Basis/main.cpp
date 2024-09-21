@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
     }
     
     Graph *grafo = new Graph(arquivo_entrada, false, false, true);
-
+    
 
     arquivo_entrada.close();
     grafo->~Graph();

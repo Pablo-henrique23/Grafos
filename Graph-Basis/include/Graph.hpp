@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 
+
 using namespace std;
 class Graph
 {
@@ -19,11 +20,13 @@ public:
     void remove_node(size_t node_id);
     void remove_edge(size_t node_id_1, size_t node_id_2);
     void add_node(size_t node_id, float weight = 0);
-    void add_edge(size_t node_id_1, size_t node_id_2, float weight = 0, bool gemea = false);
+    void add_edge(size_t node_id_1, size_t node_id_2, float weight = 1, bool gemea = false);
     void print_graph(std::ofstream& output_file);
     int conected(size_t node_id_1, size_t node_id_2);
     void print_graph();
-
+    
+    vector<Edge*> order_edges_non_decreasing_gap();
+    vector<Edge*> const_procedure();
 
     pair<size_t,string> floyd(size_t inicio, size_t destino);
     pair<size_t,string> dijkstra(size_t orig, size_t dest);
@@ -67,9 +70,14 @@ public:
     
     void exportar(vector<Edge*> arestas, ofstream& arquivo_saida);
     void lista_adjacencia(ofstream& arquivo_saida);
-    void printa_matriz_adj();
+
     void AlgoritmoGuloso();
     bool isAdjacent(size_t first_id,size_t second_id);
+
+    int determinar_gap_aresta(Edge* aresta);
+    bool compararArestas(const Edge* a, const Edge* b);
+    bool arestas_adj(vector<Edge*> arestas, Edge* alvo);
+    vector<Edge*> constructive_proc();
 
 private:
     size_t _number_of_nodes;
@@ -86,6 +94,8 @@ private:
     size_t raio;
     vector<size_t> centro;
     vector<size_t> periferia;
+
+    int numeroSubGrafos;
 };
 
 #endif  //GRAPH_HPP

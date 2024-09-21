@@ -10,6 +10,7 @@
 #include <vector>
 #include <algorithm>
 #include <queue>
+#include <math.h>
 
 using namespace std;
 Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool weighted_nodes){
@@ -29,7 +30,6 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     // ANALISE DE ARQUIVO DE ENTRADA
     _first=nullptr;
     string linha;
-    size_t numeroSubGrafos;
     string vertices;
     string pesosVertices;
     string arestasConectados;
@@ -38,14 +38,14 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
     bool parametroNumeroDeVerticesEncontrados=false;
     bool parametroPesosVertices=false;
     bool parametroArestaConectado = false;
-    // Deus nos ajude com stringstream
-     cout << "Começando a ler arquivo.\n";
+
+    cout << "Começando a ler arquivo.\n";
     while (getline(instance, linha)){ // le cada linha
         stringstream ss(linha);
         if(linha.find("param p :=")!=string::npos){
-            size_t posicaoParametro =linha.find("=")+1;
+            size_t posicaoParametro = linha.find("=")+1;
             size_t tamanho = linha.find(';')-posicaoParametro;
-            numeroSubGrafos = stoi(linha.substr(posicaoParametro,tamanho));
+            this->numeroSubGrafos = stoi(linha.substr(posicaoParametro,tamanho));
         }
         else if(linha.find("set V := ")!=string::npos)
         {
@@ -54,36 +54,36 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
         }
         else if(linha.find("param w := ")!=string::npos)
         {
-        parametroPesosVertices=true;
-        continue;
+            parametroPesosVertices=true;
+            continue;
         }
         else if(linha.find("set E := ")!=string::npos)
         {
-        parametroArestaConectado = true;
-        continue;
+            parametroArestaConectado = true;
+            continue;
         }
         if(parametroNumeroDeVerticesEncontrados)
         {
             if(linha.find(";")!=string::npos){
-            parametroNumeroDeVerticesEncontrados = false;
+                parametroNumeroDeVerticesEncontrados = false;
             }
             else
             {
-            vertices+=linha;
+                vertices+=linha;
             }
         }
         if(parametroPesosVertices){
             if(linha.find(";")!=string::npos){
-            parametroPesosVertices = false;
+                parametroPesosVertices = false;
             }else{
                 cout<<"vertice:"<<linha.substr(0,3)<<" de peso: "<<linha.substr(5,3)<<endl;
                 add_node(stoi(linha.substr(0,3)),stoi(linha.substr(5,3)));
-            pesosVertices+=linha+"\n";
+                pesosVertices+=linha+"\n";
             }
         }
         if(parametroArestaConectado){
             if(linha.find(";")!=string::npos){
-            parametroArestaConectado = false;
+                parametroArestaConectado = false;
             }else{
                 string primeiroVertice="";
                 size_t idPrimeiroNo;
@@ -123,38 +123,137 @@ Graph::Graph(ifstream& instance, bool direcionado, bool weighted_edges, bool wei
             }
         }
     }
-     cout<<"Numero de subgrafos: "<<numeroSubGrafos<<endl;
+    cout<<"Numero de subgrafos: "<<numeroSubGrafos<<endl;
     cout<<"vertices"<<vertices<<endl;
     //cout<<"Pesos dos vertices"<<pesosVertices<<endl;
     cout<<"Arestas Conectadas"<<arestasConectados<<endl;
-     cout << "Terminou de ler \n";
+    cout << "Terminou de ler \n";
     this->raio = infinito;
     this->diametro = 0;
-     print_graph();
+    print_graph();
     
 }
+
+// usado para ordenação
+bool Graph::compararArestas(const Edge* a, const Edge* b) { // compara duas arestas e retorna verdadeiro se A tem menor gap que B
+    int diffA = search_for_node(a->_source_id)->_weight - search_for_node(a->_target_id)->_weight;// pesoVertice(a.u) - pesoVertice(a.v);
+    int diffB = search_for_node(b->_source_id)->_weight - search_for_node(b->_target_id)->_weight;;
+    return diffA < diffB;
+}
+
+vector<Edge*> Graph::order_edges_non_decreasing_gap(){
+    vector<Edge*> retorno;
+    Edge* aresta = _first->_first_edge;
+    Node* no = _first;
+    while (no->_next_node != nullptr){ // percorrendo cada aresta
+        while (aresta != nullptr){
+            retorno.push_back(aresta);
+            aresta = aresta->_next_edge;
+        }
+        no = no->_next_node;
+        aresta = no->_first_edge;
+    }
+    sort(retorno.begin(), retorno.end(), compararArestas); // organizando
+    return retorno;
+}
+
+int Graph::determinar_gap_aresta(Edge* aresta){
+    Node* source = search_for_node(aresta->_source_id);
+    Node* target = search_for_node(aresta->_target_id);
+    return abs(source->_weight - target->_weight);
+}
+
+// busca se determinada aresta é adj a outra aresta num conjunto
+bool Graph::arestas_adj(vector<Edge*> arestas, Edge* alvo){
+    for (auto aresta : arestas){
+        if(aresta->_source_id == alvo->_source_id || aresta->_target_id == alvo->_target_id
+            || aresta->_target_id == alvo->_source_id || aresta->_source_id == alvo->_target_id){
+            return true;
+        } 
+    }
+    return false;
+}
+
+// pagina 3 do paper
+vector<Edge*> Graph::constructive_proc(){
+    vector<Edge*> x;
+    vector<Node*> vertices_descobertos;
+    vector<Edge*> arestas = order_edges_non_decreasing_gap();
+    int total_gap = 0;
+    int p = this->numeroSubGrafos;
+    Edge* escolhida ;
+    while(x.size() < p){ // padrão do algoritmo
+        for(int i = 0; i < arestas.size(); i++){ // extract_first(E\X)
+            if(!aresta_no_vetor(x, arestas[i])){
+                escolhida = arestas[i];
+                auto iterador = arestas.at(i);
+                arestas.erase(remove(arestas.begin(), arestas.end(), arestas[i]), arestas.end()); // remove a aresta que a gente pegou
+            }
+        }
+        if(!arestas_adj(x, escolhida)){ // se a escolhida nao é adjacente a ngm que ta em X
+            Node* source = search_for_node(escolhida->_source_id);
+            if (!node_no_vetor(vertices_descobertos, source)){
+                vertices_descobertos.push_back(source);
+            }
+            Node* target = search_for_node(escolhida->_target_id);
+            if(!node_no_vetor(vertices_descobertos, target)){
+                vertices_descobertos.push_back(target);
+            }
+            x.push_back(escolhida);
+            total_gap += determinar_gap_aresta(escolhida);
+        }
+    }
+    int maior = 0;
+    int menor = total_gap;
+    Edge* melhor;
+    while (vertices_descobertos.size() <= this->_number_of_nodes){ // while there are vertices uncovered by X
+        for (auto vertice : vertices_descobertos) { // for each edge e in the cut generated by the vertices covered by X do
+            for (Edge* aresta = vertice->_first_edge; aresta != nullptr; aresta = aresta->_next_edge){
+                // Compute the total gap obtained if e were added to X;
+                int gap = determinar_gap_aresta(aresta);
+                if(gap < menor){
+                    menor = gap;
+                    melhor = aresta;
+                }
+            }
+        }
+        Node* source = search_for_node(escolhida->_source_id);
+        if (!node_no_vetor(vertices_descobertos, source)){
+            vertices_descobertos.push_back(source);
+        }
+        Node* target = search_for_node(escolhida->_target_id);
+        if(!node_no_vetor(vertices_descobertos, target)){
+            vertices_descobertos.push_back(target);
+        }
+        if(!aresta_no_vetor(x, melhor)){
+            x.push_back(melhor);
+        }
+    }
+    return x;
+}
+
 void Graph::AlgoritmoGuloso()
 {
-     vector<Edge> X;  // Conjunto X de arestas
+    vector<Edge> X;  // Conjunto X de arestas
     set<size_t> coveredVertices; // Vértices cobertos por X
     int p = 3; 
     Edge* e= new Edge();
     while(e->_next_edge!=nullptr){
 
      
-    if(X.size()>p){break;}
-    for (int coveredVertice:coveredVertices)
-    {
-        /* code */
-    if(!isAdjacent(e->_source_id,coveredVertice)){
-        X.push_back(*e);
-        coveredVertices.insert(e->_source_id);
-        coveredVertices.insert(e->_target_id);
+        if(X.size()>p) break;
+        for (int coveredVertice:coveredVertices)
+        {
+            /* code */
+            if(!isAdjacent(e->_source_id,coveredVertice)){
+                X.push_back(*e);
+                coveredVertices.insert(e->_source_id);
+                coveredVertices.insert(e->_target_id);
+        
+            }
+        }
+    }
     
-    }
-    }
-    
-    }
     while(coveredVertices.size()<this->_number_of_nodes){
         
     }
@@ -169,15 +268,15 @@ size_t gap(size_t weightOne,size_t weightTwo){
 
 }
 bool Graph::isAdjacent(size_t first_id,size_t second_id){
- Node* firstNode = search_for_node(first_id);
- Edge* edgeTraversal = firstNode->_first_edge;
-while(edgeTraversal!=nullptr){
-            if(edgeTraversal->_target_id==second_id){
-                return true;
-            }
-           edgeTraversal=edgeTraversal->_next_edge;
+    Node* firstNode = search_for_node(first_id);
+    Edge* edgeTraversal = firstNode->_first_edge;
+    while(edgeTraversal!=nullptr){
+        if(edgeTraversal->_target_id==second_id){
+            return true;
         }
-        return false;
+        edgeTraversal=edgeTraversal->_next_edge;
+    }
+    return false;
 }
 bool hasUncoveredVertices(){
     return true;
@@ -342,7 +441,7 @@ void Graph::add_node(size_t node_id, float weight)
     }
 }
 
-void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool _gemea){  
+void Graph::add_edge(size_t node_id_1, size_t node_id_2, float weight, bool _gemea){  // default weight = 1, _gemea = false
     Node* No1;
     Node* traversal=this->_first;
     //adj[node_id_1].push_back(make_pair(node_id_2, weight));
@@ -391,10 +490,10 @@ void Graph::print_graph()
     Node* traversal=this->_first;
     Edge* edgeTraversal = traversal->_first_edge;
     while(traversal!=nullptr){
-        cout<<"Contem no:"<<traversal->_id<<endl;
+        cout<<"Contem no:"<<traversal->_id << "\t Peso = " << traversal->_weight<<endl;
         edgeTraversal = traversal->_first_edge;
         while(edgeTraversal!=nullptr){
-            cout<<"     Contem aresta:"<<traversal->_id<<"-"<<edgeTraversal->_target_id<<endl;
+            cout<<"     Contem aresta:"<<traversal->_id<<"-"<<edgeTraversal->_target_id << " (" << edgeTraversal->_weight<<")"<<endl;
            edgeTraversal=edgeTraversal->_next_edge;
         }
         traversal=traversal->_next_node;
@@ -930,15 +1029,7 @@ Edge* Graph::getAresta(size_t no1, size_t no2){
     return nullptr;
 }
 
-/* 
-LEIA-ME!! Luciana, esta função abaixo foi dedicada a te possibilitar exportar um
-grafo para o GraphViz. Entretanto! Optamos por nos manter teoricamente corretos quanto ao formato de uma lista de 
-adjacência, visto que o formato que o GraphViz entende iria requerer uma alteração grande no conceito da lista de adj.
-Visto isso, descomente essa função caso ache necessário exportar para o GraphViz. Também peço humildemente para que saiba 
-que esta função não está sendo usada em todos os cases, dada a nossa escolha acima. 
-Assim, podem aparecer alguns empecilhos no caminho e, nesse caso, peço que use da nossa ajuda.
-Para que saiba, a função que está sendo usada na main é a exportar() que vem logo após essa.
-*/
+// feita pra exportar no formato do graphviz
 // void Graph::exportar(vector<Edge*> arestas, ofstream& arquivo_saida){
 //     // fazer uma lista de adjacência com as arestas
 
